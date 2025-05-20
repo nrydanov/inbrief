@@ -5,16 +5,20 @@ import (
 	pb "dsc/inbrief/scraper/pkg/proto"
 	"dsc/inbrief/scraper/pkg/tl"
 	"fmt"
+	"time"
 
 	"github.com/zelenin/go-tdlib/client"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *server) Fetch(
 	ctx context.Context,
 	req *pb.FetchRequest,
-) (*pb.FetchResponse, error) {
+) (resp *pb.FetchResponse, err error) {
 	state := s.state
+
+	resp = &pb.FetchResponse{}
 
 	info, err := state.TlClient.CheckChatFolderInviteLink(
 		&client.CheckChatFolderInviteLinkRequest{
@@ -34,94 +38,49 @@ func (s *server) Fetch(
 	zap.L().Debug("Scraping channels", zap.String("ids", fmt.Sprintf("%+v", ids)))
 
 	for _, id := range ids {
-		_, err := state.TlClient.GetChat(
-			&client.GetChatRequest{
-				ChatId: int64(id),
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
+		fromMessageId := int64(0)
+		for {
+			history, err := state.TlClient.GetChatHistory(
+				&client.GetChatHistoryRequest{
+					ChatId:        int64(id),
+					FromMessageId: fromMessageId,
+					Limit:         100,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
 
+			reachedEnd := false
+
+			for _, message := range history.Messages {
+				if int64(message.Date) < req.LeftBound.Seconds {
+					zap.L().Debug("Reached left bound")
+					reachedEnd = true
+					break
+				}
+				zap.L().Debug("Scraped message", zap.String("time", fmt.Sprintf("%+v", message.Date)))
+
+				switch message.Content.(type) {
+				case *client.MessageText:
+					resp.Messages = append(resp.Messages, &pb.Message{
+						Id:     message.Id,
+						Text:   message.Content.(*client.MessageText).Text.Text,
+						Ts:     timestamppb.New(time.Unix(int64(message.Date), 0)),
+						ChatId: message.ChatId,
+					})
+				default:
+					continue
+				}
+			}
+			if reachedEnd {
+				break
+			}
+
+			fromMessageId = history.Messages[len(history.Messages)-1].Id
+
+		}
 	}
 
-	return &pb.FetchResponse{}, nil
+	return resp, err
 }
-
-// Health godoc
-// @Summary      Health check
-// @Description  Returns status ok
-// @Tags         health
-// @Produce      json
-// @Success      200
-// @Router       /health [get]
-// func health(c *gin.Context) {
-// 	c.JSON(200, gin.H{
-// 		"status": "ok",
-// 	})
-// }
-
-// Scrape godoc
-// @Summary      Scrape request
-// @Description  Handle scrape request with query parameters
-// @Tags         scrape
-// @Produce      json
-// @Param        chat_folder_link  query     string    false  "Chat folder link"  default(https://t.me/addlist/grg7NStE6881MDE6)
-// @Param        right_bound       query     string    true   "Right bound datetime"  format(date-time)  default(2025-05-20T15:00:00+04:00)
-// @Param        left_bound        query     string    true   "Left bound datetime"   format(date-time)  default(2025-05-18T15:00:00+04:00)
-// @Param        social            query     bool      false  "Social flag" default(false)
-// @Success      200
-// @Failure      400
-// @Router       /scrape [get]
-// func scrape(c *gin.Context, state *internal.AppState) {
-// 	var req models.ScrapeRequest
-// 	if err := c.ShouldBindQuery(&req); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{
-// 			"error": err.Error(),
-// 		})
-// 		return
-// 	}
-
-// 	var err error
-
-// 	defer func() {
-// 		if err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{
-// 				"error": err.Error(),
-// 			})
-// 		} else {
-// 			c.JSON(http.StatusOK, gin.H{
-// 				"status": "ok",
-// 			})
-// 		}
-// 	}()
-
-// 	info, err := state.TlClient.CheckChatFolderInviteLink(
-// 		&client.CheckChatFolderInviteLinkRequest{
-// 			InviteLink: req.ChatFolderLink,
-// 		},
-// 	)
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	ids := make([]tl.ChatId, len(info.AddedChatIds))
-
-// 	for i, id := range info.AddedChatIds {
-// 		ids[i] = tl.ChatId(id)
-// 	}
-
-// 	zap.L().Debug("Scraping channels", zap.String("ids", fmt.Sprintf("%+v", ids)))
-
-// 	for _, id := range ids {
-// 		chat, err := state.TlClient.GetChat(
-// 			&client.GetChatRequest{
-// 				ChatId: int64(id),
-// 			},
-// 		)
-// 		if err != nil {
-// 			return
-// 		}
-
-// 	}
-// }

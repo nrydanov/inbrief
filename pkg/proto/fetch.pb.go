@@ -134,16 +134,84 @@ func (x *FetchRequest) GetSocial() bool {
 	return false
 }
 
+type Message struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	Ts            *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=ts,proto3" json:"ts,omitempty"`
+	ChatId        int64                  `protobuf:"varint,4,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Message) Reset() {
+	*x = Message{}
+	mi := &file_proto_fetch_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Message) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Message) ProtoMessage() {}
+
+func (x *Message) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_fetch_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Message.ProtoReflect.Descriptor instead.
+func (*Message) Descriptor() ([]byte, []int) {
+	return file_proto_fetch_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Message) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Message) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *Message) GetTs() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Ts
+	}
+	return nil
+}
+
+func (x *Message) GetChatId() int64 {
+	if x != nil {
+		return x.ChatId
+	}
+	return 0
+}
+
 type FetchResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatIds       []string               `protobuf:"bytes,2,rep,name=chat_ids,json=chatIds,proto3" json:"chat_ids,omitempty"`
+	Messages      []*Message             `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *FetchResponse) Reset() {
 	*x = FetchResponse{}
-	mi := &file_proto_fetch_proto_msgTypes[2]
+	mi := &file_proto_fetch_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -155,7 +223,7 @@ func (x *FetchResponse) String() string {
 func (*FetchResponse) ProtoMessage() {}
 
 func (x *FetchResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_fetch_proto_msgTypes[2]
+	mi := &file_proto_fetch_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -168,12 +236,12 @@ func (x *FetchResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FetchResponse.ProtoReflect.Descriptor instead.
 func (*FetchResponse) Descriptor() ([]byte, []int) {
-	return file_proto_fetch_proto_rawDescGZIP(), []int{2}
+	return file_proto_fetch_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *FetchResponse) GetChatIds() []string {
+func (x *FetchResponse) GetMessages() []*Message {
 	if x != nil {
-		return x.ChatIds
+		return x.Messages
 	}
 	return nil
 }
@@ -194,9 +262,14 @@ const file_proto_fetch_proto_rawDesc = "" +
 	"left_bound\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tleftBound\x12\x1b\n" +
 	"\x06social\x18\x05 \x01(\bH\x01R\x06social\x88\x01\x01B\r\n" +
 	"\v_request_idB\t\n" +
-	"\a_social\"*\n" +
-	"\rFetchResponse\x12\x19\n" +
-	"\bchat_ids\x18\x02 \x03(\tR\achatIds2C\n" +
+	"\a_social\"r\n" +
+	"\aMessage\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\x12*\n" +
+	"\x02ts\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x02ts\x12\x17\n" +
+	"\achat_id\x18\x04 \x01(\x03R\x06chatId\"=\n" +
+	"\rFetchResponse\x12,\n" +
+	"\bmessages\x18\x01 \x03(\v2\x10.scraper.MessageR\bmessages2C\n" +
 	"\aFetcher\x128\n" +
 	"\x05Fetch\x12\x15.scraper.FetchRequest\x1a\x16.scraper.FetchResponse\"\x00B\vZ\tpkg/protob\x06proto3"
 
@@ -212,23 +285,26 @@ func file_proto_fetch_proto_rawDescGZIP() []byte {
 	return file_proto_fetch_proto_rawDescData
 }
 
-var file_proto_fetch_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_proto_fetch_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_fetch_proto_goTypes = []any{
 	(*Empty)(nil),                 // 0: scraper.Empty
 	(*FetchRequest)(nil),          // 1: scraper.FetchRequest
-	(*FetchResponse)(nil),         // 2: scraper.FetchResponse
-	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
+	(*Message)(nil),               // 2: scraper.Message
+	(*FetchResponse)(nil),         // 3: scraper.FetchResponse
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_proto_fetch_proto_depIdxs = []int32{
-	3, // 0: scraper.FetchRequest.right_bound:type_name -> google.protobuf.Timestamp
-	3, // 1: scraper.FetchRequest.left_bound:type_name -> google.protobuf.Timestamp
-	1, // 2: scraper.Fetcher.Fetch:input_type -> scraper.FetchRequest
-	2, // 3: scraper.Fetcher.Fetch:output_type -> scraper.FetchResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	4, // 0: scraper.FetchRequest.right_bound:type_name -> google.protobuf.Timestamp
+	4, // 1: scraper.FetchRequest.left_bound:type_name -> google.protobuf.Timestamp
+	4, // 2: scraper.Message.ts:type_name -> google.protobuf.Timestamp
+	2, // 3: scraper.FetchResponse.messages:type_name -> scraper.Message
+	1, // 4: scraper.Fetcher.Fetch:input_type -> scraper.FetchRequest
+	3, // 5: scraper.Fetcher.Fetch:output_type -> scraper.FetchResponse
+	5, // [5:6] is the sub-list for method output_type
+	4, // [4:5] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_fetch_proto_init() }
@@ -243,7 +319,7 @@ func file_proto_fetch_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_fetch_proto_rawDesc), len(file_proto_fetch_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

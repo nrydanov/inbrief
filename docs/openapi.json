@@ -28,11 +28,34 @@
       },
       "scraper.FetchResponse": {
         "properties": {
-          "chat_ids": {
+          "messages": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/scraper.Message"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "scraper.Message": {
+        "properties": {
+          "chat_id": {
+            "format": "int64",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "ts": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "type": "object"
