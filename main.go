@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"dsc/inbrief/scraper/internal"
 	"dsc/inbrief/scraper/pkg/log"
 	defaultlog "log"
 
@@ -23,12 +24,12 @@ func main() {
 	if err != nil {
 		defaultlog.Fatalf("Failed to init logger: %v", err)
 	}
-	defer log.L.Sync()
+	defer zap.L().Sync()
 
-	_ = tl.InitClient(ctx, *cfg)
-
-	srv := server.NewServer(cfg)
-	if err := srv.Run(cfg.Server.GetAddr()); err != nil {
-		log.L.Fatal("Failed to run server", zap.Error(err))
+	tlClient := tl.InitClient(ctx, *cfg)
+	state := internal.AppState{
+		TlClient: tlClient,
 	}
+
+	server.StartServer(cfg, &state)
 }

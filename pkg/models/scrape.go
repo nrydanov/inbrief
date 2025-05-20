@@ -21,11 +21,14 @@ type ScrapeRequest struct {
 	Social         bool      `form:"social"`
 }
 
-// NewScrapeRequest конструктор с установкой значений по умолчанию
-func NewScrapeRequest() *ScrapeRequest {
-	return &ScrapeRequest{
-		ChatFolderLink: "https://t.me/addlist/4eTLcGIrIx9hNzUy",
-		RightBound:     time.Now().Local(),
-		Social:         false,
-	}
+type Message struct {
+	ID        int64     `json:"id"`
+	ChannelID string    `json:"channel_id"`
+	Title     string    `json:"title"`
+	Link      string    `json:"link"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type ScrapeResponse struct {
+	Messages []Message `json:"messages"`
 }

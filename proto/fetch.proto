@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package scraper;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "pkg/proto";
+
+
+message Empty {}
+
+message FetchRequest {
+  optional string request_id = 1;
+
+  string chat_folder_link = 2;
+  google.protobuf.Timestamp right_bound = 3;
+  google.protobuf.Timestamp left_bound = 4;
+  optional bool social = 5;
+}
+
+message FetchResponse {
+  repeated string chat_ids = 2;
+}
+
+service Fetcher {
+  rpc Fetch(FetchRequest) returns (FetchResponse) {}
+}

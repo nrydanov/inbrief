@@ -15,8 +15,8 @@ type TelegramConfig struct {
 }
 
 type ServerConfig struct {
-	Host string `env:"HOST, default=localhost"`
-	Port uint32 `env:"PORT, default=8080"`
+	Host string `env:"HOST, default=127.0.0.1"`
+	Port string `env:"PORT, default=8080"`
 }
 
 type Config struct {
@@ -26,7 +26,7 @@ type Config struct {
 }
 
 func (c *ServerConfig) GetAddr() string {
-	return fmt.Sprintf("%s:%d", c.Host, c.Port)
+	return fmt.Sprintf("%s:%s", c.Host, c.Port)
 }
 
 func Load(ctx context.Context) (*Config, error) {

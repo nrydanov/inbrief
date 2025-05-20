@@ -1,41 +1,41 @@
 package server
 
 import (
-	"time"
-
 	"dsc/inbrief/scraper/config"
-	"dsc/inbrief/scraper/pkg/log"
+	"dsc/inbrief/scraper/internal"
+	"log"
+	"net/http"
 
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	_ "dsc/inbrief/scraper/docs"
-
-	ginzap "github.com/gin-contrib/zap"
+	pb "dsc/inbrief/scraper/pkg/proto"
+	"github.com/swaggest/swgui/v5emb"
 )
 
-func NewServer(cfg *config.Config) *gin.Engine {
-	r := gin.Default()
-	r.SetTrustedProxies(nil)
+type server struct {
+	state *internal.AppState
+}
 
-	r.Use(ginzap.Ginzap(log.L, time.RFC3339, true))
-	if cfg.Debug {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
+func StartServer(cfg *config.Config, state *internal.AppState) {
+	twirpHandler := pb.NewFetcherServer(&server{state: state})
+
+	mux := http.NewServeMux()
+	mux.Handle(twirpHandler.PathPrefix(), twirpHandler)
+	mux.HandleFunc("/api/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./docs/openapi.json")
+	})
+
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		w.Write([]byte("OK"))
+	})
+
+	mux.Handle("/api/docs/", v5emb.New(
+		"Inbrief Scraper",
+		"/api/swagger.json",
+		"/api/docs/",
+	))
+
+	err := http.ListenAndServe(cfg.Server.GetAddr(), mux)
+	if err != nil {
+		log.Fatalf("failed to start server: %v", err)
 	}
-
-	{
-		r.GET("/health", health)
-
-		r.GET("/scrape", scrape)
-
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-		r.GET("/docs", func(c *gin.Context) {
-			c.Redirect(302, "/swagger/index.html")
-		})
-	}
-
-	return r
 }

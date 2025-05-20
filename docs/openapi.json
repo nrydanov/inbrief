@@ -1,0 +1,75 @@
+{
+  "components": {
+    "schemas": {
+      "scraper.Empty": {
+        "type": "object"
+      },
+      "scraper.FetchRequest": {
+        "properties": {
+          "chat_folder_link": {
+            "type": "string"
+          },
+          "left_bound": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "right_bound": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "social": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "scraper.FetchResponse": {
+        "properties": {
+          "chat_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "open-api-v3-docs",
+    "version": "0.1"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/twirp/scraper.Fetcher/Fetch": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/scraper.FetchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/scraper.FetchResponse"
+                }
+              }
+            },
+            "description": "Success"
+          }
+        },
+        "summary": "Fetch"
+      }
+    }
+  }
+}
