@@ -6,6 +6,7 @@ import (
 
 	"dsc/inbrief/scraper/config"
 	"dsc/inbrief/scraper/internal/server"
+	"dsc/inbrief/scraper/internal/telegram"
 )
 
 func main() {
@@ -14,6 +15,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+
+	_ = telegram.InitClient(ctx, *cfg)
 
 	srv := server.New(cfg)
 	if err := srv.Run(); err != nil {

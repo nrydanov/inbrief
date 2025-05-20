@@ -10,7 +10,7 @@ import (
 
 type TelegramConfig struct {
 	ApiHash string `env:"API_HASH"`
-	ApiId   string `env:"API_ID"`
+	ApiId   int32  `env:"API_ID"`
 	Session string `env:"SESSION"`
 }
 
