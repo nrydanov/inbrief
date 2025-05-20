@@ -1,0 +1,43 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Просто команда для сборки. Вы можете использовать `make` или другие инструменты
+cmd = "go build -o ./tmp/main ."
+# Бинарный файл, полученный в результате сборки
+bin = "tmp/main"
+# Пользовательские команды для выполнения при запуске
+full_bin = "APP_ENV=dev APP_USER=air ./tmp/main"
+# Следить за этими расширениями файлов
+include_ext = ["go", "tpl", "tmpl", "html"]
+# Игнорировать эти расширения файлов или каталоги
+exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+# Следить за этими каталогами, если указано
+include_dir = []
+# Игнорировать эти файлы
+exclude_file = []
+# Это log файл
+log = "air_errors.log"
+# Это время ожидания после каждой сборки
+delay = 1000 # ms
+# Остановить запущенный бинарный файл перед сборкой
+stop_on_error = true
+# Отправлять Interrupt перед завершением процесса (не работает в Windows)
+send_interrupt = false
+# Задержка отправки interrupt сигнала
+kill_delay = 500 # ms
+
+[log]
+# Показывать время в логах
+time = true
+
+[color]
+# Пользовательские цвета для каждого типа логов
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# Удалять временные файлы при выходе
+clean_on_exit = true 

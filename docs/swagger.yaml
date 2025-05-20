@@ -1,0 +1,53 @@
+info:
+  contact: {}
+paths:
+  /health:
+    get:
+      description: Returns status ok
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Health check
+      tags:
+      - health
+  /scrape:
+    get:
+      description: Handle scrape request with query parameters
+      parameters:
+      - default: https://t.me/addlist/4eTLcGIrIx9hNzUy
+        description: Chat folder link
+        in: query
+        name: chat_folder_link
+        type: string
+      - default: "2025-05-20T15:02:00+04:00"
+        description: Right bound datetime
+        format: date-time
+        in: query
+        name: right_bound
+        required: true
+        type: string
+      - default: "2025-05-19T15:02:00+04:00"
+        description: Left bound datetime
+        format: date-time
+        in: query
+        name: left_bound
+        required: true
+        type: string
+      - default: false
+        description: Social flag
+        in: query
+        name: social
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Scrape request
+      tags:
+      - scrape
+swagger: "2.0"
