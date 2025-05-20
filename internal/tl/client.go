@@ -1,12 +1,14 @@
-package telegram
+package tl
 
 import (
 	"context"
 	"dsc/inbrief/scraper/config"
-	"log"
+	"dsc/inbrief/scraper/pkg/log"
+	"fmt"
 	"path/filepath"
 
 	"github.com/zelenin/go-tdlib/client"
+	"go.uber.org/zap"
 )
 
 func InitClient(ctx context.Context, cfg config.Config) *client.Client {
@@ -33,37 +35,52 @@ func InitClient(ctx context.Context, cfg config.Config) *client.Client {
 		NewVerbosityLevel: 1,
 	})
 	if err != nil {
-		log.Fatalf("SetLogVerbosityLevel error: %s", err)
+		log.L.Fatal("SetLogVerbosityLevel", zap.Error(err))
 	}
 
 	tdlibClient, err := client.NewClient(authorizer)
 	if err != nil {
-		log.Fatalf("NewClient error: %s", err)
+		log.L.Fatal("NewClient error", zap.Error(err))
 	}
 
 	versionOption, err := client.GetOption(&client.GetOptionRequest{
 		Name: "version",
 	})
 	if err != nil {
-		log.Fatalf("GetOption error: %s", err)
+		log.L.Fatal("GetOption error", zap.Error(err))
 	}
 
 	commitOption, err := client.GetOption(&client.GetOptionRequest{
 		Name: "commit_hash",
 	})
 	if err != nil {
-		log.Fatalf("GetOption error: %s", err)
+		log.L.Fatal("GetOption", zap.Error(err))
 	}
-
-	log.Printf("TDLib version: %s (commit: %s)", versionOption.(*client.OptionValueString).Value, commitOption.(*client.OptionValueString).Value)
 
 	me, err := tdlibClient.GetMe()
 	if err != nil {
-		log.Fatalf("GetMe error: %s", err)
+		log.L.Fatal("GetMe error", zap.Error(err))
 	}
 
-	log.Printf("Me: %s %s", me.FirstName, me.LastName)
+	log.L.Info("TDLib loaded",
+		zap.String(
+			"version",
+			versionOption.(*client.OptionValueString).Value,
+		),
+		zap.String(
+			"commit",
+			commitOption.(*client.OptionValueString).Value,
+		),
+		zap.String(
+			"me",
+			fmt.Sprintf("%s %s", me.FirstName, me.LastName),
+		),
+	)
 
 	return tdlibClient
 
+}
+
+type ClientService struct {
+	client *client.Client
 }

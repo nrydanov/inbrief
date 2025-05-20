@@ -1,9 +1,10 @@
 package server
 
 import (
-	"fmt"
+	"time"
 
 	"dsc/inbrief/scraper/config"
+	"dsc/inbrief/scraper/pkg/log"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -11,37 +12,30 @@ import (
 
 	_ "dsc/inbrief/scraper/docs"
 
+	ginzap "github.com/gin-contrib/zap"
 )
 
-type Server struct {
-	cfg    *config.Config
-	router *gin.Engine
-}
-
-func New(cfg *config.Config) *Server {
+func NewServer(cfg *config.Config) *gin.Engine {
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
+
+	r.Use(ginzap.Ginzap(log.L, time.RFC3339, true))
 	if cfg.Debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	r.GET("/health", health)
+	{
+		r.GET("/health", health)
 
-	r.GET("/scrape", scrape)
+		r.GET("/scrape", scrape)
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.GET("/docs", func(c *gin.Context) {
-		c.Redirect(302, "/swagger/index.html")
-	})
-
-	return &Server{
-		cfg:    cfg,
-		router: r,
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		r.GET("/docs", func(c *gin.Context) {
+			c.Redirect(302, "/swagger/index.html")
+		})
 	}
-}
 
-func (s *Server) Run() error {
-	addr := fmt.Sprintf("%s:%s", s.cfg.Server.Host, s.cfg.Server.Port)
-	return s.router.Run(addr)
+	return r
 }

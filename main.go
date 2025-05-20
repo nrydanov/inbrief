@@ -2,24 +2,33 @@ package main
 
 import (
 	"context"
-	"log"
+	"dsc/inbrief/scraper/pkg/log"
+	defaultlog "log"
 
 	"dsc/inbrief/scraper/config"
 	"dsc/inbrief/scraper/internal/server"
-	"dsc/inbrief/scraper/internal/telegram"
+	"dsc/inbrief/scraper/internal/tl"
+
+	"go.uber.org/zap"
 )
 
 func main() {
 	ctx := context.Background()
 	cfg, err := config.Load(ctx)
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		defaultlog.Fatalf("Failed to load config: %v", err)
 	}
 
-	_ = telegram.InitClient(ctx, *cfg)
+	err = log.InitLogger()
+	if err != nil {
+		defaultlog.Fatalf("Failed to init logger: %v", err)
+	}
+	defer log.L.Sync()
 
-	srv := server.New(cfg)
-	if err := srv.Run(); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
+	_ = tl.InitClient(ctx, *cfg)
+
+	srv := server.NewServer(cfg)
+	if err := srv.Run(cfg.Server.GetAddr()); err != nil {
+		log.L.Fatal("Failed to run server", zap.Error(err))
 	}
 }
