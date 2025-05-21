@@ -2,12 +2,11 @@ package server
 
 import (
 	"dsc/inbrief/scraper/config"
+	pc "dsc/inbrief/scraper/gen/proto/protoconnect"
 	"dsc/inbrief/scraper/internal"
+	"github.com/swaggest/swgui/v5emb"
 	"log"
 	"net/http"
-
-	pb "dsc/inbrief/scraper/pkg/proto"
-	"github.com/swaggest/swgui/v5emb"
 )
 
 type server struct {
@@ -15,12 +14,12 @@ type server struct {
 }
 
 func StartServer(cfg *config.Config, state *internal.AppState) {
-	twirpHandler := pb.NewFetcherServer(&server{state: state})
+	path, handler := pc.NewFetcherServiceHandler(server{state: state})
 
 	mux := http.NewServeMux()
-	mux.Handle(twirpHandler.PathPrefix(), twirpHandler)
-	mux.HandleFunc("/api/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./docs/openapi.json")
+	mux.Handle(path, handler)
+	mux.HandleFunc("/api/swagger.yaml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./docs/proto/fetch.openapi.yaml")
 	})
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +29,7 @@ func StartServer(cfg *config.Config, state *internal.AppState) {
 
 	mux.Handle("/api/docs/", v5emb.New(
 		"Inbrief Scraper",
-		"/api/swagger.json",
+		"/api/swagger.yaml",
 		"/api/docs/",
 	))
 

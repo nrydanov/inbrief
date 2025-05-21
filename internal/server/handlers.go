@@ -1,8 +1,9 @@
 package server
 
 import (
+	connect "connectrpc.com/connect"
 	"context"
-	pb "dsc/inbrief/scraper/pkg/proto"
+	pb "dsc/inbrief/scraper/gen/proto"
 	"dsc/inbrief/scraper/pkg/tl"
 	"fmt"
 	"time"
@@ -12,17 +13,16 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *server) Fetch(
+func (s server) Fetch(
 	ctx context.Context,
-	req *pb.FetchRequest,
-) (resp *pb.FetchResponse, err error) {
+	req *connect.Request[pb.FetchRequest],
+) (resp *connect.Response[pb.FetchResponse], err error) {
 	state := s.state
-
-	resp = &pb.FetchResponse{}
+	fetchResponse := &pb.FetchResponse{}
 
 	info, err := state.TlClient.CheckChatFolderInviteLink(
 		&client.CheckChatFolderInviteLinkRequest{
-			InviteLink: req.ChatFolderLink,
+			InviteLink: req.Msg.ChatFolderLink,
 		},
 	)
 	if err != nil {
@@ -54,7 +54,7 @@ func (s *server) Fetch(
 			reachedEnd := false
 
 			for _, message := range history.Messages {
-				if int64(message.Date) < req.LeftBound.Seconds {
+				if int64(message.Date) < req.Msg.LeftBound.Seconds {
 					zap.L().Debug("Reached left bound")
 					reachedEnd = true
 					break
@@ -63,7 +63,7 @@ func (s *server) Fetch(
 
 				switch message.Content.(type) {
 				case *client.MessageText:
-					resp.Messages = append(resp.Messages, &pb.Message{
+					fetchResponse.Messages = append(fetchResponse.Messages, &pb.Message{
 						Id:     message.Id,
 						Text:   message.Content.(*client.MessageText).Text.Text,
 						Ts:     timestamppb.New(time.Unix(int64(message.Date), 0)),
@@ -81,6 +81,8 @@ func (s *server) Fetch(
 
 		}
 	}
+
+	resp = connect.NewResponse(fetchResponse)
 
 	return resp, err
 }

@@ -3,6 +3,7 @@ module dsc/inbrief/scraper
 go 1.24.3
 
 require (
+	connectrpc.com/connect v1.18.1
 	github.com/google/uuid v1.6.0
 	github.com/sethvargo/go-envconfig v1.3.0
 	github.com/swaggest/swgui v1.8.4
