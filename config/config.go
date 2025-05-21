@@ -25,6 +25,13 @@ type RedisConfig struct {
 	Topic string `env:"TOPIC, default=inbrief"`
 }
 
+type S3Config struct {
+	Endpoint string `env:"ENDPOINT, default=http://127.0.0.1:9000"`
+	Region   string `env:"REGION, default=us-east-1"`
+	Username string `env:"USERNAME, default=minioadmin"`
+	Password string `env:"PASSWORD, default=minioadmin"`
+}
+
 func (c *RedisConfig) GetAddr() string {
 	return fmt.Sprintf("%s:%s", c.Host, c.Port)
 }
@@ -35,6 +42,7 @@ type Config struct {
 	Telegram  TelegramConfig `env:", prefix=TELEGRAM_"`
 	Server    ServerConfig   `env:", prefix=SERVER_"`
 	Redis     RedisConfig    `env:", prefix=REDIS_"`
+	S3        S3Config       `env:", prefix=S3_"`
 }
 
 func (c *ServerConfig) GetAddr() string {
