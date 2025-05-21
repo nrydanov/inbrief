@@ -16,7 +16,7 @@ import (
 func (s server) Fetch(
 	ctx context.Context,
 	req *connect.Request[pb.FetchRequest],
-) (resp *connect.Response[pb.FetchResponse], err error) {
+) (*connect.Response[pb.FetchResponse], error) {
 	state := s.state
 	fetchResponse := &pb.FetchResponse{}
 
@@ -81,8 +81,5 @@ func (s server) Fetch(
 
 		}
 	}
-
-	resp = connect.NewResponse(fetchResponse)
-
-	return resp, err
+	return connect.NewResponse(fetchResponse), nil
 }
