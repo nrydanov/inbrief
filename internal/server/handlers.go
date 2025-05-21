@@ -3,7 +3,7 @@ package server
 import (
 	connect "connectrpc.com/connect"
 	"context"
-	pb "dsc/inbrief/scraper/gen/proto"
+	pb "dsc/inbrief/scraper/gen/proto/fetcher"
 	"dsc/inbrief/scraper/pkg/tl"
 	"fmt"
 	"time"

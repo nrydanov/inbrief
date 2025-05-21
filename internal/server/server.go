@@ -2,7 +2,7 @@ package server
 
 import (
 	"dsc/inbrief/scraper/config"
-	pc "dsc/inbrief/scraper/gen/proto/protoconnect"
+	pc "dsc/inbrief/scraper/gen/proto/fetcher/protoconnect"
 	"dsc/inbrief/scraper/internal"
 	"github.com/swaggest/swgui/v5emb"
 	"log"

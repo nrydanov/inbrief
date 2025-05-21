@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: proto/fetch.proto
+// source: proto/fetcher/fetch.proto
 
-package proto
+package fetcher
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -30,7 +30,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_proto_fetch_proto_msgTypes[0]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +42,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_fetch_proto_msgTypes[0]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_proto_fetch_proto_rawDescGZIP(), []int{0}
+	return file_proto_fetcher_fetch_proto_rawDescGZIP(), []int{0}
 }
 
 type FetchRequest struct {
@@ -71,7 +71,7 @@ type FetchRequest struct {
 
 func (x *FetchRequest) Reset() {
 	*x = FetchRequest{}
-	mi := &file_proto_fetch_proto_msgTypes[1]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -83,7 +83,7 @@ func (x *FetchRequest) String() string {
 func (*FetchRequest) ProtoMessage() {}
 
 func (x *FetchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_fetch_proto_msgTypes[1]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -96,7 +96,7 @@ func (x *FetchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FetchRequest.ProtoReflect.Descriptor instead.
 func (*FetchRequest) Descriptor() ([]byte, []int) {
-	return file_proto_fetch_proto_rawDescGZIP(), []int{1}
+	return file_proto_fetcher_fetch_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *FetchRequest) GetRequestId() string {
@@ -146,7 +146,7 @@ type Message struct {
 
 func (x *Message) Reset() {
 	*x = Message{}
-	mi := &file_proto_fetch_proto_msgTypes[2]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -158,7 +158,7 @@ func (x *Message) String() string {
 func (*Message) ProtoMessage() {}
 
 func (x *Message) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_fetch_proto_msgTypes[2]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -171,7 +171,7 @@ func (x *Message) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Message.ProtoReflect.Descriptor instead.
 func (*Message) Descriptor() ([]byte, []int) {
-	return file_proto_fetch_proto_rawDescGZIP(), []int{2}
+	return file_proto_fetcher_fetch_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Message) GetId() int64 {
@@ -211,7 +211,7 @@ type FetchResponse struct {
 
 func (x *FetchResponse) Reset() {
 	*x = FetchResponse{}
-	mi := &file_proto_fetch_proto_msgTypes[3]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +223,7 @@ func (x *FetchResponse) String() string {
 func (*FetchResponse) ProtoMessage() {}
 
 func (x *FetchResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_fetch_proto_msgTypes[3]
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +236,7 @@ func (x *FetchResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FetchResponse.ProtoReflect.Descriptor instead.
 func (*FetchResponse) Descriptor() ([]byte, []int) {
-	return file_proto_fetch_proto_rawDescGZIP(), []int{3}
+	return file_proto_fetcher_fetch_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *FetchResponse) GetMessages() []*Message {
@@ -246,11 +246,11 @@ func (x *FetchResponse) GetMessages() []*Message {
 	return nil
 }
 
-var File_proto_fetch_proto protoreflect.FileDescriptor
+var File_proto_fetcher_fetch_proto protoreflect.FileDescriptor
 
-const file_proto_fetch_proto_rawDesc = "" +
+const file_proto_fetcher_fetch_proto_rawDesc = "" +
 	"\n" +
-	"\x11proto/fetch.proto\x12\afetcher\x1a\x1fgoogle/protobuf/timestamp.proto\"\a\n" +
+	"\x19proto/fetcher/fetch.proto\x12\afetcher\x1a\x1fgoogle/protobuf/timestamp.proto\"\a\n" +
 	"\x05Empty\"\x8b\x02\n" +
 	"\fFetchRequest\x12\"\n" +
 	"\n" +
@@ -271,29 +271,29 @@ const file_proto_fetch_proto_rawDesc = "" +
 	"\rFetchResponse\x12,\n" +
 	"\bmessages\x18\x01 \x03(\v2\x10.fetcher.MessageR\bmessages2J\n" +
 	"\x0eFetcherService\x128\n" +
-	"\x05Fetch\x12\x15.fetcher.FetchRequest\x1a\x16.fetcher.FetchResponse\"\x00B\x1fZ\x1ddsc/inbrief/scraper/gen/protob\x06proto3"
+	"\x05Fetch\x12\x15.fetcher.FetchRequest\x1a\x16.fetcher.FetchResponse\"\x00B'Z%dsc/inbrief/scraper/gen/proto/fetcherb\x06proto3"
 
 var (
-	file_proto_fetch_proto_rawDescOnce sync.Once
-	file_proto_fetch_proto_rawDescData []byte
+	file_proto_fetcher_fetch_proto_rawDescOnce sync.Once
+	file_proto_fetcher_fetch_proto_rawDescData []byte
 )
 
-func file_proto_fetch_proto_rawDescGZIP() []byte {
-	file_proto_fetch_proto_rawDescOnce.Do(func() {
-		file_proto_fetch_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_fetch_proto_rawDesc), len(file_proto_fetch_proto_rawDesc)))
+func file_proto_fetcher_fetch_proto_rawDescGZIP() []byte {
+	file_proto_fetcher_fetch_proto_rawDescOnce.Do(func() {
+		file_proto_fetcher_fetch_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_fetcher_fetch_proto_rawDesc), len(file_proto_fetcher_fetch_proto_rawDesc)))
 	})
-	return file_proto_fetch_proto_rawDescData
+	return file_proto_fetcher_fetch_proto_rawDescData
 }
 
-var file_proto_fetch_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
-var file_proto_fetch_proto_goTypes = []any{
+var file_proto_fetcher_fetch_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_fetcher_fetch_proto_goTypes = []any{
 	(*Empty)(nil),                 // 0: fetcher.Empty
 	(*FetchRequest)(nil),          // 1: fetcher.FetchRequest
 	(*Message)(nil),               // 2: fetcher.Message
 	(*FetchResponse)(nil),         // 3: fetcher.FetchResponse
 	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
-var file_proto_fetch_proto_depIdxs = []int32{
+var file_proto_fetcher_fetch_proto_depIdxs = []int32{
 	4, // 0: fetcher.FetchRequest.right_bound:type_name -> google.protobuf.Timestamp
 	4, // 1: fetcher.FetchRequest.left_bound:type_name -> google.protobuf.Timestamp
 	4, // 2: fetcher.Message.ts:type_name -> google.protobuf.Timestamp
@@ -307,27 +307,27 @@ var file_proto_fetch_proto_depIdxs = []int32{
 	0, // [0:4] is the sub-list for field type_name
 }
 
-func init() { file_proto_fetch_proto_init() }
-func file_proto_fetch_proto_init() {
-	if File_proto_fetch_proto != nil {
+func init() { file_proto_fetcher_fetch_proto_init() }
+func file_proto_fetcher_fetch_proto_init() {
+	if File_proto_fetcher_fetch_proto != nil {
 		return
 	}
-	file_proto_fetch_proto_msgTypes[1].OneofWrappers = []any{}
+	file_proto_fetcher_fetch_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_fetch_proto_rawDesc), len(file_proto_fetch_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_fetcher_fetch_proto_rawDesc), len(file_proto_fetcher_fetch_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_fetch_proto_goTypes,
-		DependencyIndexes: file_proto_fetch_proto_depIdxs,
-		MessageInfos:      file_proto_fetch_proto_msgTypes,
+		GoTypes:           file_proto_fetcher_fetch_proto_goTypes,
+		DependencyIndexes: file_proto_fetcher_fetch_proto_depIdxs,
+		MessageInfos:      file_proto_fetcher_fetch_proto_msgTypes,
 	}.Build()
-	File_proto_fetch_proto = out.File
-	file_proto_fetch_proto_goTypes = nil
-	file_proto_fetch_proto_depIdxs = nil
+	File_proto_fetcher_fetch_proto = out.File
+	file_proto_fetcher_fetch_proto_goTypes = nil
+	file_proto_fetcher_fetch_proto_depIdxs = nil
 }
