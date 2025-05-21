@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"dsc/inbrief/scraper/internal"
-	"dsc/inbrief/scraper/pkg/log"
+	"github.com/nrydanov/inbrief/internal"
+	"github.com/nrydanov/inbrief/pkg/log"
 	defaultlog "log"
 
-	"dsc/inbrief/scraper/config"
-	"dsc/inbrief/scraper/internal/server"
-	"dsc/inbrief/scraper/internal/tl"
+	"github.com/nrydanov/inbrief/config"
+	"github.com/nrydanov/inbrief/internal/server"
+	"github.com/nrydanov/inbrief/internal/tl"
 
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -27,8 +28,15 @@ func main() {
 	defer zap.L().Sync()
 
 	tlClient := tl.InitClient(ctx, *cfg)
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.GetAddr(),
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
 	state := internal.AppState{
-		TlClient: tlClient,
+		TlClient:    tlClient,
+		RedisClient: rdb,
 	}
 
 	server.StartServer(cfg, &state)

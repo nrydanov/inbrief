@@ -2,7 +2,7 @@ package tl
 
 import (
 	"context"
-	"dsc/inbrief/scraper/config"
+	"github.com/nrydanov/inbrief/config"
 	"fmt"
 	"path/filepath"
 
@@ -78,8 +78,4 @@ func InitClient(ctx context.Context, cfg config.Config) *client.Client {
 
 	return tdlibClient
 
-}
-
-type TlService struct {
-	Client *client.Client
 }

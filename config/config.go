@@ -19,10 +19,22 @@ type ServerConfig struct {
 	Port string `env:"PORT, default=8080"`
 }
 
+type RedisConfig struct {
+	Host  string `env:"HOST, default=127.0.0.1"`
+	Port  string `env:"PORT, default=6379"`
+	Topic string `env:"TOPIC, default=inbrief"`
+}
+
+func (c *RedisConfig) GetAddr() string {
+	return fmt.Sprintf("%s:%s", c.Host, c.Port)
+}
+
 type Config struct {
-	Debug    bool           `env:"DEBUG, default=true"`
-	Telegram TelegramConfig `env:", prefix=TELEGRAM_"`
-	Server   ServerConfig   `env:", prefix=SERVER_"`
+	Debug     bool           `env:"DEBUG, default=true"`
+	Streaming bool           `env:"STREAMING, default=true"`
+	Telegram  TelegramConfig `env:", prefix=TELEGRAM_"`
+	Server    ServerConfig   `env:", prefix=SERVER_"`
+	Redis     RedisConfig    `env:", prefix=REDIS_"`
 }
 
 func (c *ServerConfig) GetAddr() string {

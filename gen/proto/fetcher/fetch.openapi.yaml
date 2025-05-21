@@ -37,6 +37,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/fetcher.FetchResponse'
+  /fetcher.FetcherService/SubscribeChat:
+    post:
+      tags:
+        - fetcher.FetcherService
+      summary: SubscribeChat
+      operationId: fetcher.FetcherService.SubscribeChat
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/fetcher.SubscribeChatFolderRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fetcher.Empty'
 components:
   schemas:
     fetcher.Empty:
@@ -97,6 +132,14 @@ components:
           title: chat_id
           format: int64
       title: Message
+      additionalProperties: false
+    fetcher.SubscribeChatFolderRequest:
+      type: object
+      properties:
+        chatFolderLink:
+          type: string
+          title: chat_folder_link
+      title: SubscribeChatFolderRequest
       additionalProperties: false
     google.protobuf.Timestamp:
       type: string

@@ -246,6 +246,50 @@ func (x *FetchResponse) GetMessages() []*Message {
 	return nil
 }
 
+type SubscribeChatFolderRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ChatFolderLink string                 `protobuf:"bytes,1,opt,name=chat_folder_link,json=chatFolderLink,proto3" json:"chat_folder_link,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SubscribeChatFolderRequest) Reset() {
+	*x = SubscribeChatFolderRequest{}
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeChatFolderRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeChatFolderRequest) ProtoMessage() {}
+
+func (x *SubscribeChatFolderRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_fetcher_fetch_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeChatFolderRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeChatFolderRequest) Descriptor() ([]byte, []int) {
+	return file_proto_fetcher_fetch_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SubscribeChatFolderRequest) GetChatFolderLink() string {
+	if x != nil {
+		return x.ChatFolderLink
+	}
+	return ""
+}
+
 var File_proto_fetcher_fetch_proto protoreflect.FileDescriptor
 
 const file_proto_fetcher_fetch_proto_rawDesc = "" +
@@ -269,9 +313,12 @@ const file_proto_fetcher_fetch_proto_rawDesc = "" +
 	"\x02ts\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x02ts\x12\x17\n" +
 	"\achat_id\x18\x04 \x01(\x03R\x06chatId\"=\n" +
 	"\rFetchResponse\x12,\n" +
-	"\bmessages\x18\x01 \x03(\v2\x10.fetcher.MessageR\bmessages2J\n" +
+	"\bmessages\x18\x01 \x03(\v2\x10.fetcher.MessageR\bmessages\"F\n" +
+	"\x1aSubscribeChatFolderRequest\x12(\n" +
+	"\x10chat_folder_link\x18\x01 \x01(\tR\x0echatFolderLink2\x92\x01\n" +
 	"\x0eFetcherService\x128\n" +
-	"\x05Fetch\x12\x15.fetcher.FetchRequest\x1a\x16.fetcher.FetchResponse\"\x00B'Z%dsc/inbrief/scraper/gen/proto/fetcherb\x06proto3"
+	"\x05Fetch\x12\x15.fetcher.FetchRequest\x1a\x16.fetcher.FetchResponse\"\x00\x12F\n" +
+	"\rSubscribeChat\x12#.fetcher.SubscribeChatFolderRequest\x1a\x0e.fetcher.Empty\"\x00B/Z-github.com/nrydanov/inbrief/gen/proto/fetcherb\x06proto3"
 
 var (
 	file_proto_fetcher_fetch_proto_rawDescOnce sync.Once
@@ -285,23 +332,26 @@ func file_proto_fetcher_fetch_proto_rawDescGZIP() []byte {
 	return file_proto_fetcher_fetch_proto_rawDescData
 }
 
-var file_proto_fetcher_fetch_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_fetcher_fetch_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_fetcher_fetch_proto_goTypes = []any{
-	(*Empty)(nil),                 // 0: fetcher.Empty
-	(*FetchRequest)(nil),          // 1: fetcher.FetchRequest
-	(*Message)(nil),               // 2: fetcher.Message
-	(*FetchResponse)(nil),         // 3: fetcher.FetchResponse
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*Empty)(nil),                      // 0: fetcher.Empty
+	(*FetchRequest)(nil),               // 1: fetcher.FetchRequest
+	(*Message)(nil),                    // 2: fetcher.Message
+	(*FetchResponse)(nil),              // 3: fetcher.FetchResponse
+	(*SubscribeChatFolderRequest)(nil), // 4: fetcher.SubscribeChatFolderRequest
+	(*timestamppb.Timestamp)(nil),      // 5: google.protobuf.Timestamp
 }
 var file_proto_fetcher_fetch_proto_depIdxs = []int32{
-	4, // 0: fetcher.FetchRequest.right_bound:type_name -> google.protobuf.Timestamp
-	4, // 1: fetcher.FetchRequest.left_bound:type_name -> google.protobuf.Timestamp
-	4, // 2: fetcher.Message.ts:type_name -> google.protobuf.Timestamp
+	5, // 0: fetcher.FetchRequest.right_bound:type_name -> google.protobuf.Timestamp
+	5, // 1: fetcher.FetchRequest.left_bound:type_name -> google.protobuf.Timestamp
+	5, // 2: fetcher.Message.ts:type_name -> google.protobuf.Timestamp
 	2, // 3: fetcher.FetchResponse.messages:type_name -> fetcher.Message
 	1, // 4: fetcher.FetcherService.Fetch:input_type -> fetcher.FetchRequest
-	3, // 5: fetcher.FetcherService.Fetch:output_type -> fetcher.FetchResponse
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
+	4, // 5: fetcher.FetcherService.SubscribeChat:input_type -> fetcher.SubscribeChatFolderRequest
+	3, // 6: fetcher.FetcherService.Fetch:output_type -> fetcher.FetchResponse
+	0, // 7: fetcher.FetcherService.SubscribeChat:output_type -> fetcher.Empty
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
 	4, // [4:4] is the sub-list for extension extendee
 	0, // [0:4] is the sub-list for field type_name
@@ -319,7 +369,7 @@ func file_proto_fetcher_fetch_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_fetcher_fetch_proto_rawDesc), len(file_proto_fetcher_fetch_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

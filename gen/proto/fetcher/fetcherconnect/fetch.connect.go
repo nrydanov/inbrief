@@ -7,8 +7,8 @@ package fetcherconnect
 import (
 	connect "connectrpc.com/connect"
 	context "context"
-	fetcher "dsc/inbrief/scraper/gen/proto/fetcher"
 	errors "errors"
+	fetcher "github.com/nrydanov/inbrief/gen/proto/fetcher"
 	http "net/http"
 	strings "strings"
 )
@@ -35,11 +35,15 @@ const (
 const (
 	// FetcherServiceFetchProcedure is the fully-qualified name of the FetcherService's Fetch RPC.
 	FetcherServiceFetchProcedure = "/fetcher.FetcherService/Fetch"
+	// FetcherServiceSubscribeChatProcedure is the fully-qualified name of the FetcherService's
+	// SubscribeChat RPC.
+	FetcherServiceSubscribeChatProcedure = "/fetcher.FetcherService/SubscribeChat"
 )
 
 // FetcherServiceClient is a client for the fetcher.FetcherService service.
 type FetcherServiceClient interface {
 	Fetch(context.Context, *connect.Request[fetcher.FetchRequest]) (*connect.Response[fetcher.FetchResponse], error)
+	SubscribeChat(context.Context, *connect.Request[fetcher.SubscribeChatFolderRequest]) (*connect.Response[fetcher.Empty], error)
 }
 
 // NewFetcherServiceClient constructs a client for the fetcher.FetcherService service. By default,
@@ -59,12 +63,19 @@ func NewFetcherServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(fetcherServiceMethods.ByName("Fetch")),
 			connect.WithClientOptions(opts...),
 		),
+		subscribeChat: connect.NewClient[fetcher.SubscribeChatFolderRequest, fetcher.Empty](
+			httpClient,
+			baseURL+FetcherServiceSubscribeChatProcedure,
+			connect.WithSchema(fetcherServiceMethods.ByName("SubscribeChat")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // fetcherServiceClient implements FetcherServiceClient.
 type fetcherServiceClient struct {
-	fetch *connect.Client[fetcher.FetchRequest, fetcher.FetchResponse]
+	fetch         *connect.Client[fetcher.FetchRequest, fetcher.FetchResponse]
+	subscribeChat *connect.Client[fetcher.SubscribeChatFolderRequest, fetcher.Empty]
 }
 
 // Fetch calls fetcher.FetcherService.Fetch.
@@ -72,9 +83,15 @@ func (c *fetcherServiceClient) Fetch(ctx context.Context, req *connect.Request[f
 	return c.fetch.CallUnary(ctx, req)
 }
 
+// SubscribeChat calls fetcher.FetcherService.SubscribeChat.
+func (c *fetcherServiceClient) SubscribeChat(ctx context.Context, req *connect.Request[fetcher.SubscribeChatFolderRequest]) (*connect.Response[fetcher.Empty], error) {
+	return c.subscribeChat.CallUnary(ctx, req)
+}
+
 // FetcherServiceHandler is an implementation of the fetcher.FetcherService service.
 type FetcherServiceHandler interface {
 	Fetch(context.Context, *connect.Request[fetcher.FetchRequest]) (*connect.Response[fetcher.FetchResponse], error)
+	SubscribeChat(context.Context, *connect.Request[fetcher.SubscribeChatFolderRequest]) (*connect.Response[fetcher.Empty], error)
 }
 
 // NewFetcherServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -90,10 +107,18 @@ func NewFetcherServiceHandler(svc FetcherServiceHandler, opts ...connect.Handler
 		connect.WithSchema(fetcherServiceMethods.ByName("Fetch")),
 		connect.WithHandlerOptions(opts...),
 	)
+	fetcherServiceSubscribeChatHandler := connect.NewUnaryHandler(
+		FetcherServiceSubscribeChatProcedure,
+		svc.SubscribeChat,
+		connect.WithSchema(fetcherServiceMethods.ByName("SubscribeChat")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/fetcher.FetcherService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FetcherServiceFetchProcedure:
 			fetcherServiceFetchHandler.ServeHTTP(w, r)
+		case FetcherServiceSubscribeChatProcedure:
+			fetcherServiceSubscribeChatHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -105,4 +130,8 @@ type UnimplementedFetcherServiceHandler struct{}
 
 func (UnimplementedFetcherServiceHandler) Fetch(context.Context, *connect.Request[fetcher.FetchRequest]) (*connect.Response[fetcher.FetchResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("fetcher.FetcherService.Fetch is not implemented"))
+}
+
+func (UnimplementedFetcherServiceHandler) SubscribeChat(context.Context, *connect.Request[fetcher.SubscribeChatFolderRequest]) (*connect.Response[fetcher.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("fetcher.FetcherService.SubscribeChat is not implemented"))
 }
