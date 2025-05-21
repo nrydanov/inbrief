@@ -1,10 +1,11 @@
 package tl
 
 import (
-	pb "github.com/nrydanov/inbrief/gen/proto/fetcher"
-	"github.com/nrydanov/inbrief/internal"
 	"fmt"
 	"time"
+
+	pb "github.com/nrydanov/inbrief/gen/proto/fetcher"
+	"github.com/nrydanov/inbrief/internal"
 
 	"github.com/zelenin/go-tdlib/client"
 	"go.uber.org/zap"

@@ -2,13 +2,14 @@ package server
 
 import (
 	"context"
+	"log"
+	"net/http"
+
 	"github.com/nrydanov/inbrief/config"
 	"github.com/nrydanov/inbrief/gen/proto/fetcher"
 	pc "github.com/nrydanov/inbrief/gen/proto/fetcher/fetcherconnect"
 	"github.com/nrydanov/inbrief/internal"
 	"github.com/nrydanov/inbrief/internal/tl"
-	"log"
-	"net/http"
 
 	"connectrpc.com/connect"
 	"github.com/swaggest/swgui/v5emb"

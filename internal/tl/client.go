@@ -2,9 +2,10 @@ package tl
 
 import (
 	"context"
-	"github.com/nrydanov/inbrief/config"
 	"fmt"
 	"path/filepath"
+
+	"github.com/nrydanov/inbrief/config"
 
 	"github.com/zelenin/go-tdlib/client"
 	"go.uber.org/zap"
@@ -77,5 +78,4 @@ func InitClient(ctx context.Context, cfg config.Config) *client.Client {
 	)
 
 	return tdlibClient
-
 }

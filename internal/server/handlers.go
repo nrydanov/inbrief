@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
+	"fmt"
+
 	pb "github.com/nrydanov/inbrief/gen/proto/fetcher"
 	"github.com/nrydanov/inbrief/internal/tl"
-	"fmt"
 
 	connect "connectrpc.com/connect"
 
@@ -38,7 +39,6 @@ func (s server) Fetch(
 			req.Msg.RightBound.AsTime(),
 			state,
 		)
-
 		// TODO(nrydanov): Handle error
 		if err != nil {
 			continue

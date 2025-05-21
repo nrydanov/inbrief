@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	defaultlog "log"
+
 	"github.com/nrydanov/inbrief/internal"
 	"github.com/nrydanov/inbrief/pkg/log"
-	defaultlog "log"
 
 	"github.com/nrydanov/inbrief/config"
 	"github.com/nrydanov/inbrief/internal/server"
