@@ -19,7 +19,7 @@ func StartServer(cfg *config.Config, state *internal.AppState) {
 	mux := http.NewServeMux()
 	mux.Handle(path, handler)
 	mux.HandleFunc("/api/swagger.yaml", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./docs/proto/fetch.openapi.yaml")
+		http.ServeFile(w, r, "./gen/proto/fetcher/fetch.openapi.yaml")
 	})
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
