@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/sethvargo/go-envconfig"
 )
@@ -20,9 +21,9 @@ type ServerConfig struct {
 }
 
 type RedisConfig struct {
-	Host  string `env:"HOST, default=127.0.0.1"`
-	Port  string `env:"PORT, default=6379"`
-	Topic string `env:"TOPIC, default=inbrief"`
+	Host    string `env:"HOST, default=127.0.0.1"`
+	Port    string `env:"PORT, default=6379"`
+	Channel string `env:"CHANNEL, default=inbrief"`
 }
 
 type S3Config struct {
@@ -36,13 +37,18 @@ func (c *RedisConfig) GetAddr() string {
 	return fmt.Sprintf("%s:%s", c.Host, c.Port)
 }
 
+type StreamingConfig struct {
+	On          bool          `env:"ON, default=true"`
+	FlushPeriod time.Duration `env:"FLUSH_PERIOD, default=5s"`
+}
+
 type Config struct {
-	Debug     bool           `env:"DEBUG, default=true"`
-	Streaming bool           `env:"STREAMING, default=true"`
-	Telegram  TelegramConfig `env:", prefix=TELEGRAM_"`
-	Server    ServerConfig   `env:", prefix=SERVER_"`
-	Redis     RedisConfig    `env:", prefix=REDIS_"`
-	S3        S3Config       `env:", prefix=S3_"`
+	Debug     bool            `env:"DEBUG, default=true"`
+	Streaming StreamingConfig `env:", prefix=STREAMING_"`
+	Telegram  TelegramConfig  `env:", prefix=TELEGRAM_"`
+	Server    ServerConfig    `env:", prefix=SERVER_"`
+	Redis     RedisConfig     `env:", prefix=REDIS_"`
+	S3        S3Config        `env:", prefix=S3_"`
 }
 
 func (c *ServerConfig) GetAddr() string {

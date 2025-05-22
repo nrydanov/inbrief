@@ -34,37 +34,41 @@ func main() {
 	defer zap.L().Sync()
 
 	tlClient := tl.InitClient(ctx, *cfg)
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Redis.GetAddr(),
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		zap.L().Fatal("Failed to ping Redis", zap.Error(err))
-	} else {
-		zap.L().Info("Initialized Redis client successfully")
-	}
-
+	var rdb *redis.Client
 	var s3Client *s3.S3
-	{
-		session := session.Must(session.NewSession())
-		s3Client = s3.New(
-			session,
-			aws.NewConfig().
-				WithRegion(cfg.S3.Region).
-				WithCredentials(credentials.NewStaticCredentials(
-					cfg.S3.Username,
-					cfg.S3.Password,
-					"",
-				)).WithEndpoint(cfg.S3.Endpoint),
-		)
-
-		if _, err := s3Client.ListBuckets(&s3.ListBucketsInput{}); err != nil {
-			zap.L().Fatal("Failed to initialize S3 client", zap.Error(err))
+	if cfg.Streaming.On {
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     cfg.Redis.GetAddr(),
+			Password: "", // no password set
+			DB:       0,  // use default DB
+		})
+		if err := rdb.Ping(ctx).Err(); err != nil {
+			zap.L().Fatal("Failed to ping Redis", zap.Error(err))
 		} else {
-			zap.L().Info("Initialized S3 client successfully")
+			zap.L().Info("Initialized Redis client successfully")
 		}
+
+		{
+			session := session.Must(session.NewSession())
+			s3Client = s3.New(
+				session,
+				aws.NewConfig().
+					WithRegion(cfg.S3.Region).
+					WithCredentials(credentials.NewStaticCredentials(
+						cfg.S3.Username,
+						cfg.S3.Password,
+						"",
+					)).WithEndpoint(cfg.S3.Endpoint),
+			)
+
+			if _, err := s3Client.ListBuckets(&s3.ListBucketsInput{}); err != nil {
+				zap.L().Fatal("Failed to initialize S3 client", zap.Error(err))
+			} else {
+				zap.L().Info("Initialized S3 client successfully")
+			}
+		}
+
+		s3Client.Config.S3ForcePathStyle = aws.Bool(true)
 	}
 
 	state := internal.AppState{
@@ -79,11 +83,11 @@ func main() {
 		state.RedisClient,
 		state.S3Client,
 		100,
-		"inbrief:scraped",
+		"inbrief",
 	)
 
-	go eventHandler.FlushByPeriod(ctx, time.Second*30)
-	go eventHandler.Handle(state.Listener, state.RedisClient)
+	go eventHandler.FlushByPeriod(ctx, time.Second*5)
+	go eventHandler.Handle(ctx, state.Listener, state.RedisClient)
 	server.StartServer(cfg, &state)
 
 }
