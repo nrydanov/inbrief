@@ -5,7 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
+	"sort"
 	"time"
+	"unicode/utf16"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -107,8 +110,41 @@ func (eh *EventHandler) FlushByPeriod(ctx context.Context, period time.Duration)
 	}
 }
 
+func processText(text *client.FormattedText) string {
+	blacklist := []string{
+		"textEntityTypeBotCommand",
+		"textEntityTypeHashtag",
+		"textEntityTypeMention",
+		"textEntityTypeCashtag",
+		"textEntityTypeMentionName",
+		"textEntityTypeUrl",
+		"textEntityTypeTextUrl",
+	}
+
+	sort.Slice(text.Entities, func(i, j int) bool {
+		return text.Entities[i].Offset > text.Entities[j].Offset
+	})
+
+	u16Text := utf16.Encode([]rune(text.Text))
+
+	for _, entity := range text.Entities {
+		if slices.Contains(blacklist, entity.Type.TextEntityTypeType()) {
+			if entity.Offset >= 0 &&
+				entity.Offset < int32(len(u16Text)) &&
+				entity.Offset+entity.Length <= int32(len(u16Text)) {
+
+				u16Text = append(
+					u16Text[:entity.Offset],
+					u16Text[entity.Offset+entity.Length:]...)
+			}
+		}
+	}
+
+	return string(utf16.Decode(u16Text))
+}
+
 func (eh *EventHandler) newMessageHandler(ctx context.Context, msg *client.UpdateNewMessage) {
-	zap.L().Info(
+	zap.L().Debug(
 		"New message",
 		zap.String("chat_id", fmt.Sprintf(
 			"%d",
@@ -121,20 +157,24 @@ func (eh *EventHandler) newMessageHandler(ctx context.Context, msg *client.Updat
 	)
 	switch content := msg.Message.Content.(type) {
 	case *client.MessageText:
-		zap.L().Info(
+		zap.L().Debug(
 			"New message text",
 			zap.String("text", content.Text.Text),
 		)
-		eh.msgBuffer[eh.ptr] = &pb.Message{
-			Id:     msg.Message.Id,
-			Text:   content.Text.Text,
-			Ts:     timestamppb.New(time.Unix(int64(msg.Message.Date), 0)),
-			ChatId: msg.Message.ChatId,
-		}
-		eh.ptr += 1
+		processedText := processText(content.Text)
+		zap.L().Debug("Processed text", zap.String("text", processedText))
+		if len([]rune(processedText)) > 50 {
+			eh.msgBuffer[eh.ptr] = &pb.Message{
+				Id:     msg.Message.Id,
+				Text:   processedText,
+				Ts:     timestamppb.New(time.Unix(int64(msg.Message.Date), 0)),
+				ChatId: msg.Message.ChatId,
+			}
+			eh.ptr += 1
 
-		if eh.ptr == len(eh.msgBuffer) {
-			eh.flush(ctx)
+			if eh.ptr == len(eh.msgBuffer) {
+				eh.flush(ctx)
+			}
 		}
 	}
 }

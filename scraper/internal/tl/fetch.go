@@ -48,7 +48,7 @@ func FetchChannel(
 			case *client.MessageText:
 				messages = append(messages, &pb.Message{
 					Id:     message.Id,
-					Text:   message.Content.(*client.MessageText).Text.Text,
+					Text:   processText(message.Content.(*client.MessageText).Text),
 					Ts:     timestamppb.New(time.Unix(int64(message.Date), 0)),
 					ChatId: message.ChatId,
 				})
