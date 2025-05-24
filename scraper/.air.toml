@@ -23,9 +23,9 @@ delay = 1000 # ms
 # Остановить запущенный бинарный файл перед сборкой
 stop_on_error = true
 # Отправлять Interrupt перед завершением процесса (не работает в Windows)
-send_interrupt = false
+send_interrupt = true
 # Задержка отправки interrupt сигнала
-kill_delay = 500 # ms
+kill_delay = 5000 # ms
 
 [log]
 # Показывать время в логах

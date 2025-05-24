@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	defaultlog "log"
-	"time"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/nrydanov/inbrief/internal"
 	"github.com/nrydanov/inbrief/pkg/log"
@@ -13,7 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/nrydanov/inbrief/config"
-	pb "github.com/nrydanov/inbrief/gen/proto/fetcher"
 	"github.com/nrydanov/inbrief/internal/server"
 	"github.com/nrydanov/inbrief/internal/tl"
 
@@ -22,7 +23,13 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
+	defer cancel()
+
 	cfg, err := config.Load(ctx)
 	if err != nil {
 		defaultlog.Fatalf("Failed to load config: %v", err)
@@ -35,18 +42,24 @@ func main() {
 	defer zap.L().Sync()
 
 	tlClient := tl.InitClient(ctx, *cfg)
+	defer tlClient.Close()
+
 	var rdb *redis.Client
 	var s3Client *s3.S3
 	if cfg.Streaming.On {
-		rdb = redis.NewClient(&redis.Options{
-			Addr:     cfg.Redis.GetAddr(),
-			Password: "", // no password set
-			DB:       0,  // use default DB
-		})
-		if err := rdb.Ping(ctx).Err(); err != nil {
-			zap.L().Fatal("Failed to ping Redis", zap.Error(err))
-		} else {
-			zap.L().Info("Initialized Redis client successfully")
+		{
+			rdb = redis.NewClient(&redis.Options{
+				Addr:     cfg.Redis.GetAddr(),
+				Password: "", // no password set
+				DB:       0,  // use default DB
+			})
+			defer rdb.Close()
+
+			if err := rdb.Ping(ctx).Err(); err != nil {
+				zap.L().Fatal("Failed to ping Redis", zap.Error(err))
+			} else {
+				zap.L().Info("Initialized Redis client successfully")
+			}
 		}
 
 		{
@@ -79,11 +92,11 @@ func main() {
 		S3Client:    s3Client,
 	}
 
-	eventCh := make(chan *pb.Message, 100)
+	wg := sync.WaitGroup{}
 
-	eventHandler := tl.NewEventHandler(
+	eventHandler, eventCh := tl.NewEventHandler(
 		state.Listener,
-		eventCh,
+		cfg.Streaming.BatchSize,
 	)
 
 	notifier := internal.NewNotifier(
@@ -91,12 +104,30 @@ func main() {
 		state.S3Client,
 		state.RedisClient,
 		cfg.Redis.Channel,
-		cfg.Streaming.BatchSize,
 	)
 
-	go notifier.Listen(ctx)
-	go notifier.NotifyByPeriod(ctx, time.Second*5)
-	go eventHandler.Handle(ctx, state.Listener, state.RedisClient)
-	server.StartServer(cfg, &state)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		notifier.Listen(ctx, cfg.Streaming.BatchSize)
+		zap.L().Debug("Notifier is stopped")
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		eventHandler.Handle(ctx, state.Listener, state.RedisClient)
+		zap.L().Debug("Event handler is stopped")
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		server.StartServer(ctx, cfg, &state)
+		zap.L().Debug("RPC server is stopped")
+	}()
+
+	wg.Wait()
+	zap.L().Info("All workers are stopped, exiting")
 
 }

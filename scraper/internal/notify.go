@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -20,11 +19,7 @@ type Notifier struct {
 	ch         <-chan *pb.Message
 	s3Client   *s3.S3
 	rdb        *redis.Client
-	buffer     []*pb.Message
 	pubChannel string
-	ptr        int
-
-	mu sync.Mutex
 }
 
 func NewNotifier(
@@ -32,47 +27,67 @@ func NewNotifier(
 	s3 *s3.S3,
 	rdb *redis.Client,
 	pubChannel string,
-	bufferSize int,
 ) *Notifier {
 	return &Notifier{
 		ch:         ch,
 		s3Client:   s3,
 		rdb:        rdb,
 		pubChannel: pubChannel,
-		buffer:     make([]*pb.Message, bufferSize),
 	}
 }
 
-func (n *Notifier) Listen(ctx context.Context) {
-	for msg := range n.ch {
-		zap.L().Debug("Received new message", zap.String("text", msg.Text))
-		n.mu.Lock()
-		n.buffer[n.ptr] = msg
-		n.ptr += 1
-		timeToNotify := n.ptr == cap(n.buffer)
-		n.mu.Unlock()
+func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
 
-		if timeToNotify {
-			err := n.notify(ctx)
+	ticker := time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
+
+	buffer := make([]*pb.Message, bufferSize)
+	ptr := 0
+	flushCh := make(chan []*pb.Message)
+	sendSafe := func() {
+		newBuffer := make([]*pb.Message, ptr)
+		copy(newBuffer, buffer[:ptr])
+		flushCh <- newBuffer
+		ptr = 0
+	}
+	defer close(flushCh)
+	defer sendSafe()
+
+	go func() {
+		for msgs := range flushCh {
+			err := n.notify(msgs)
 			if err != nil {
 				zap.L().Error("Failed to notify", zap.Error(err))
+			}
+		}
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			sendSafe()
+		case msg, ok := <-n.ch:
+			if !ok {
+				return
+			}
+			zap.L().Debug("Received new message", zap.String("text", msg.Text))
+			buffer[ptr] = msg
+			ptr += 1
+
+			if ptr == cap(buffer) {
+				sendSafe()
 			}
 		}
 	}
 }
 
-func (n *Notifier) NotifyByPeriod(ctx context.Context, period time.Duration) {
-	for {
-		<-time.After(period)
-		err := n.notify(ctx)
-		if err != nil {
-			zap.L().Error("Failed to notify", zap.Error(err))
-		}
-	}
-}
+func (n *Notifier) notify(msgs []*pb.Message) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
-func (n *Notifier) notify(ctx context.Context) error {
-	nMsgs := n.ptr
+	nMsgs := len(msgs)
 	if nMsgs == 0 {
 		zap.L().Info("Nothing to flush since last time")
 		return nil
@@ -88,7 +103,7 @@ func (n *Notifier) notify(ctx context.Context) error {
 	}
 
 	jsonMessages := make([]json.RawMessage, nMsgs)
-	for i, msg := range n.buffer[:nMsgs] {
+	for i, msg := range msgs {
 		jsonData, err := marshaler.Marshal(msg)
 		if err != nil {
 			zap.L().Error("Failed to marshal proto message", zap.Error(err))
@@ -115,12 +130,10 @@ func (n *Notifier) notify(ctx context.Context) error {
 
 	zap.L().Info(
 		"Successfully flushed messages",
-		zap.Int("count", n.ptr),
+		zap.Int("count", nMsgs),
 		zap.String("id", fmt.Sprintf("%d", id)),
 	)
 
-	n.rdb.Publish(ctx, n.pubChannel, id)
-	n.ptr = 0
+	return n.rdb.Publish(ctx, n.pubChannel, id).Err()
 
-	return nil
 }

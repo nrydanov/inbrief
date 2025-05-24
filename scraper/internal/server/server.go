@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/nrydanov/inbrief/config"
@@ -10,6 +9,7 @@ import (
 	pc "github.com/nrydanov/inbrief/gen/proto/fetcher/fetcherconnect"
 	"github.com/nrydanov/inbrief/internal"
 	"github.com/nrydanov/inbrief/internal/tl"
+	"go.uber.org/zap"
 
 	"connectrpc.com/connect"
 	"github.com/swaggest/swgui/v5emb"
@@ -41,7 +41,7 @@ func (s server) SubscribeChat(
 	return connect.NewResponse[fetcher.Empty](nil), nil
 }
 
-func StartServer(cfg *config.Config, state *internal.AppState) {
+func StartServer(ctx context.Context, cfg *config.Config, state *internal.AppState) {
 	path, handler := pc.NewFetcherServiceHandler(server{state: state})
 
 	mux := http.NewServeMux()
@@ -61,8 +61,21 @@ func StartServer(cfg *config.Config, state *internal.AppState) {
 		"/api/docs/",
 	))
 
-	err := http.ListenAndServe(cfg.Server.GetAddr(), mux)
-	if err != nil {
-		log.Fatalf("failed to start server: %v", err)
+	server := &http.Server{
+		Addr:    cfg.Server.GetAddr(),
+		Handler: mux,
 	}
+
+	go func() {
+		if err := http.ListenAndServe(cfg.Server.GetAddr(), mux); err != http.ErrServerClosed {
+			zap.L().Fatal("failed to start server", zap.Error(err))
+		}
+	}()
+
+	<-ctx.Done()
+
+	if err := server.Shutdown(context.Background()); err != nil {
+		zap.L().Fatal("failed to shutdown server", zap.Error(err))
+	}
+
 }

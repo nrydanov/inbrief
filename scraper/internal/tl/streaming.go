@@ -17,17 +17,18 @@ import (
 
 type EventHandler struct {
 	listener *client.Listener
-	ch       chan<- *pb.Message
+	outputCh chan<- *pb.Message
 }
 
 func NewEventHandler(
 	listener *client.Listener,
-	ch chan *pb.Message,
-) *EventHandler {
+	bufferSize int,
+) (*EventHandler, chan *pb.Message) {
+	ch := make(chan *pb.Message, bufferSize)
 	return &EventHandler{
 		listener: listener,
-		ch:       ch,
-	}
+		outputCh: ch,
+	}, ch
 }
 
 func (eh *EventHandler) Handle(
@@ -97,7 +98,7 @@ func (eh *EventHandler) newMessageHandler(msg *client.UpdateNewMessage) {
 		processedText := processText(content.Text)
 		zap.L().Debug("Processed text", zap.String("text", processedText))
 		if len([]rune(processedText)) > 50 {
-			eh.ch <- &pb.Message{
+			eh.outputCh <- &pb.Message{
 				Id:     msg.Message.Id,
 				Text:   processedText,
 				Ts:     timestamppb.New(time.Unix(int64(msg.Message.Date), 0)),
