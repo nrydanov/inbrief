@@ -45,7 +45,13 @@ def clustering(queue):
         representation_model=KeyBERTInspired()
     )
 
-    entities = []
+
+    cached_entities = r.get("clustering:entities")
+    if cached_entities is not None:
+        entities = json.loads(cached_entities)
+    else:
+        entities = []
+
 
     pubsub = r.pubsub()
     pubsub.subscribe("inbrief")
@@ -76,7 +82,7 @@ def clustering(queue):
 
             new_texts = list(map(lambda x: x['text'], payload))
             logger.debug("Encoding texts")
-            new_embeddings = model.encode(new_texts, task="separation")
+            new_embeddings = model.encode(new_texts, task="separation").tolist()
 
             for i, entity in enumerate(payload):
                 entity['embedding'] = new_embeddings[i]
@@ -103,7 +109,7 @@ def clustering(queue):
             logger.debug("Number of texts: %s", len(texts))
             dumped_entities = json.dumps(entities)
             r.set("clustering:entities", dumped_entities)
-            dumped_topics = json.dumps(bertopic._topics)
+            dumped_topics = json.dumps(bertopic.topics_)
             r.set("clustering:topics", dumped_topics)
         # NOTE(nrydanov): Change my mind
         except Exception as e:

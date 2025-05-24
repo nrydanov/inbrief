@@ -48,17 +48,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 def get_entities(r):
-    return json.loads(r.get("clustering:entities", "."))
+    return json.loads(r.get("clustering:entities"))
 
 def get_topics(r):
-    return json.loads(r.get("clustering:topics", "."))
+    return json.loads(r.get("clustering:topics"))
 
 @app.get("/get_summary")
 async def get_summary():
     r = app.state.r
     entities = get_entities(r)
     topics = get_topics(r)
-    return {"entities": entities, "labels": topics}
+    output = [
+        {k: v for k, v in entity.items() if k != 'embeddings'}
+        for entity in entities
+    ]
+    return {"entities": output, "labels": topics}
 
 @app.get("/health")
 async def health():
