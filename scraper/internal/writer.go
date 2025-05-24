@@ -16,28 +16,28 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-type Notifier struct {
-	ch         <-chan *pb.Message
-	s3Client   *s3.S3
-	rdb        *redis.Client
-	pubChannel string
+type Writer struct {
+	inputCh   <-chan *pb.Message
+	s3Client  *s3.S3
+	rdb       *redis.Client
+	publishCh string
 }
 
-func NewNotifier(
+func NewWriter(
 	ch <-chan *pb.Message,
 	s3 *s3.S3,
 	rdb *redis.Client,
-	pubChannel string,
-) *Notifier {
-	return &Notifier{
-		ch:         ch,
-		s3Client:   s3,
-		rdb:        rdb,
-		pubChannel: pubChannel,
+	publishCh string,
+) *Writer {
+	return &Writer{
+		inputCh:   ch,
+		s3Client:  s3,
+		rdb:       rdb,
+		publishCh: publishCh,
 	}
 }
 
-func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
+func (n *Writer) Listen(ctx context.Context, bufferSize int) {
 
 	ticker := time.NewTicker(time.Second * 5)
 
@@ -63,7 +63,7 @@ func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
 	go func() {
 		defer wg.Done()
 		for msgs := range flushCh {
-			err := n.notify(msgs)
+			err := n.flush(msgs)
 			if err != nil {
 				zap.L().Error("Failed to notify", zap.Error(err))
 			}
@@ -76,7 +76,7 @@ func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
 			return
 		case <-ticker.C:
 			sendSafe()
-		case msg, ok := <-n.ch:
+		case msg, ok := <-n.inputCh:
 			if !ok {
 				return
 			}
@@ -91,7 +91,7 @@ func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
 	}
 }
 
-func (n *Notifier) notify(msgs []*pb.Message) error {
+func (n *Writer) flush(msgs []*pb.Message) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -142,6 +142,6 @@ func (n *Notifier) notify(msgs []*pb.Message) error {
 		zap.String("id", fmt.Sprintf("%d", id)),
 	)
 
-	return n.rdb.Publish(ctx, n.pubChannel, id).Err()
+	return n.rdb.Publish(ctx, n.publishCh, id).Err()
 
 }

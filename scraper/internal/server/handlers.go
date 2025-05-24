@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/nrydanov/inbrief/gen/proto/fetcher"
+	"github.com/nrydanov/inbrief/gen/proto/fetcher"
 	"github.com/nrydanov/inbrief/internal/tl"
 
 	connect "connectrpc.com/connect"
@@ -15,10 +15,10 @@ import (
 
 func (s server) Fetch(
 	ctx context.Context,
-	req *connect.Request[pb.FetchRequest],
-) (*connect.Response[pb.FetchResponse], error) {
+	req *connect.Request[fetcher.FetchRequest],
+) (*connect.Response[fetcher.FetchResponse], error) {
 	state := s.state
-	resp := &pb.FetchResponse{}
+	resp := &fetcher.FetchResponse{}
 	info, err := state.TlClient.CheckChatFolderInviteLink(
 		&client.CheckChatFolderInviteLinkRequest{
 			InviteLink: req.Msg.ChatFolderLink,
@@ -48,5 +48,33 @@ func (s server) Fetch(
 
 	}
 
+	go func() {
+		for _, msg := range resp.Messages {
+			s.msgCh <- msg
+		}
+		zap.L().Debug("All messages are sent to message channel")
+	}()
+
 	return connect.NewResponse(resp), nil
+}
+
+func (s server) SubscribeChat(
+	ctx context.Context,
+	req *connect.Request[fetcher.SubscribeChatFolderRequest],
+) (*connect.Response[fetcher.Empty], error) {
+	state := s.state
+
+	info, err := state.TlClient.CheckChatFolderInviteLink(
+		&client.CheckChatFolderInviteLinkRequest{
+			InviteLink: req.Msg.ChatFolderLink,
+		},
+	)
+
+	_ = tl.ExtractChatIds(info)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse[fetcher.Empty](nil), nil
 }

@@ -8,41 +8,26 @@ import (
 	"github.com/nrydanov/inbrief/gen/proto/fetcher"
 	pc "github.com/nrydanov/inbrief/gen/proto/fetcher/fetcherconnect"
 	"github.com/nrydanov/inbrief/internal"
-	"github.com/nrydanov/inbrief/internal/tl"
 	"go.uber.org/zap"
 
-	"connectrpc.com/connect"
 	"github.com/swaggest/swgui/v5emb"
-	"github.com/zelenin/go-tdlib/client"
 )
 
 type server struct {
 	state *internal.AppState
+	msgCh chan *fetcher.Message
 }
 
-func (s server) SubscribeChat(
+func StartServer(
 	ctx context.Context,
-	req *connect.Request[fetcher.SubscribeChatFolderRequest],
-) (*connect.Response[fetcher.Empty], error) {
-	state := s.state
-
-	info, err := state.TlClient.CheckChatFolderInviteLink(
-		&client.CheckChatFolderInviteLinkRequest{
-			InviteLink: req.Msg.ChatFolderLink,
-		},
-	)
-
-	_ = tl.ExtractChatIds(info)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse[fetcher.Empty](nil), nil
-}
-
-func StartServer(ctx context.Context, cfg *config.Config, state *internal.AppState) {
-	path, handler := pc.NewFetcherServiceHandler(server{state: state})
+	cfg *config.Config,
+	state *internal.AppState,
+	msgCh chan *fetcher.Message,
+) {
+	path, handler := pc.NewFetcherServiceHandler(server{
+		state: state,
+		msgCh: msgCh,
+	})
 
 	mux := http.NewServeMux()
 	mux.Handle(path, handler)

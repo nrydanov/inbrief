@@ -21,14 +21,14 @@ type EventHandler struct {
 }
 
 func NewEventHandler(
+	outputCh chan<- *pb.Message,
 	listener *client.Listener,
 	bufferSize int,
-) (*EventHandler, chan *pb.Message) {
-	ch := make(chan *pb.Message, bufferSize)
+) *EventHandler {
 	return &EventHandler{
 		listener: listener,
-		outputCh: ch,
-	}, ch
+		outputCh: outputCh,
+	}
 }
 
 func (eh *EventHandler) Handle(
@@ -109,6 +109,7 @@ func (eh *EventHandler) newMessageHandler(msg *client.UpdateNewMessage) {
 				Ts:     timestamppb.New(time.Unix(int64(msg.Message.Date), 0)),
 				ChatId: msg.Message.ChatId,
 			}
+			zap.L().Debug("Processed text is sent to output channel")
 		}
 	}
 }
