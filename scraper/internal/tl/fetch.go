@@ -42,7 +42,10 @@ func FetchChannel(
 				reachedEnd = true
 				break
 			}
-			zap.L().Debug("Scraped message", zap.String("time", fmt.Sprintf("%+v", message.Date)))
+			zap.L().Debug(
+				"Scraped message",
+				zap.String("time", fmt.Sprintf("%+v", message.Date)),
+			)
 
 			switch message.Content.(type) {
 			case *client.MessageText:

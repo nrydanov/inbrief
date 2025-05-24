@@ -40,6 +40,7 @@ func (c *RedisConfig) GetAddr() string {
 type StreamingConfig struct {
 	On          bool          `env:"ON, default=true"`
 	FlushPeriod time.Duration `env:"FLUSH_PERIOD, default=5s"`
+	BatchSize   int           `env:"BATCHSIZE, default=100"`
 }
 
 type Config struct {

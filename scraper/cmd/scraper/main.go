@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/nrydanov/inbrief/config"
+	pb "github.com/nrydanov/inbrief/gen/proto/fetcher"
 	"github.com/nrydanov/inbrief/internal/server"
 	"github.com/nrydanov/inbrief/internal/tl"
 
@@ -78,15 +79,23 @@ func main() {
 		S3Client:    s3Client,
 	}
 
+	eventCh := make(chan *pb.Message, 100)
+
 	eventHandler := tl.NewEventHandler(
 		state.Listener,
-		state.RedisClient,
-		state.S3Client,
-		100,
-		"inbrief",
+		eventCh,
 	)
 
-	go eventHandler.FlushByPeriod(ctx, time.Second*5)
+	notifier := internal.NewNotifier(
+		eventCh,
+		state.S3Client,
+		state.RedisClient,
+		cfg.Redis.Channel,
+		cfg.Streaming.BatchSize,
+	)
+
+	go notifier.Listen(ctx)
+	go notifier.NotifyByPeriod(ctx, time.Second*5)
 	go eventHandler.Handle(ctx, state.Listener, state.RedisClient)
 	server.StartServer(cfg, &state)
 
