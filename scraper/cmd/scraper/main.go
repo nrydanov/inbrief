@@ -109,15 +109,15 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		notifier.Listen(ctx, cfg.Streaming.BatchSize)
-		zap.L().Debug("Notifier is stopped")
+		eventHandler.Handle(ctx, state.Listener, state.RedisClient)
+		zap.L().Debug("Event handler is stopped")
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		eventHandler.Handle(ctx, state.Listener, state.RedisClient)
-		zap.L().Debug("Event handler is stopped")
+		notifier.Listen(ctx, cfg.Streaming.BatchSize)
+		zap.L().Debug("Notifier is stopped")
 	}()
 
 	wg.Add(1)
@@ -127,7 +127,18 @@ func main() {
 		zap.L().Debug("RPC server is stopped")
 	}()
 
+	<-ctx.Done()
+
 	wg.Wait()
+
+	state.Listener.Close()
+	_, err = state.TlClient.Close()
+
+	if err != nil {
+		zap.L().Fatal("Failed to close client", zap.Error(err))
+	} else {
+		zap.L().Info("Closed TDLib client successfully")
+	}
 	zap.L().Info("All workers are stopped, exiting")
 
 }

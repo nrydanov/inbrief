@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,7 +40,6 @@ func NewNotifier(
 func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
 
 	ticker := time.NewTicker(time.Second * 5)
-	defer ticker.Stop()
 
 	buffer := make([]*pb.Message, bufferSize)
 	ptr := 0
@@ -50,10 +50,18 @@ func (n *Notifier) Listen(ctx context.Context, bufferSize int) {
 		flushCh <- newBuffer
 		ptr = 0
 	}
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+
+	defer wg.Wait()
+	defer ticker.Stop()
 	defer close(flushCh)
 	defer sendSafe()
 
 	go func() {
+		defer wg.Done()
 		for msgs := range flushCh {
 			err := n.notify(msgs)
 			if err != nil {

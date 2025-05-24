@@ -36,10 +36,15 @@ func (eh *EventHandler) Handle(
 	listener *client.Listener,
 	rdb *redis.Client,
 ) {
-	for update := range listener.Updates {
-		switch msg := update.(type) {
-		case *client.UpdateNewMessage:
-			eh.newMessageHandler(msg)
+	for {
+		select {
+		case update := <-listener.Updates:
+			switch msg := update.(type) {
+			case *client.UpdateNewMessage:
+				eh.newMessageHandler(msg)
+			}
+		case <-ctx.Done():
+			return
 		}
 	}
 }
