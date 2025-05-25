@@ -17,6 +17,7 @@ interface Story {
 interface TimelineEvent {
   datetime: string;
   text: string;
+  link?: string;
 }
 
 function App() {

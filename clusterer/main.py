@@ -89,7 +89,8 @@ async def get_summary():
         timeline = [
             {
                 "datetime": entity.get("ts"),
-                "text": entity.get("text", "")
+                "text": entity.get("text", ""),
+                "link": entity.get("link", "")
             }
             for entity in entities
             if entity.get("ts") not in (None, "")

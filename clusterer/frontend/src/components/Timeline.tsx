@@ -12,6 +12,7 @@ import { ru } from 'date-fns/locale';
 export interface TimelineEvent {
   datetime: string;
   text: string;
+  link?: string;
 }
 
 interface TimelineProps {
@@ -37,7 +38,7 @@ const DateLabel: React.FC<{ date: string }> = ({ date }) => (
   </TimelineItem>
 );
 
-const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({ time, text, isLast }) => (
+const EventItem: React.FC<{ time: string; text: string; link?: string; isLast: boolean }> = ({ time, text, link, isLast }) => (
   <TimelineItem>
     <TimelineSeparator sx={{ alignItems: 'center', justifyContent: 'center' }}>
       <TimelineDot 
@@ -64,6 +65,12 @@ const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({ 
           '&:hover': {
             backgroundColor: 'var(--hover)',
             transform: 'translateX(4px)'
+          },
+          cursor: link ? 'pointer' : 'default'
+        }}
+        onClick={() => {
+          if (link) {
+            window.open(link, '_blank', 'noopener,noreferrer');
           }
         }}
       >
@@ -133,7 +140,7 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => (
         <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }} key={event.datetime + idx}>
           <Box>
             {showDate && <DateLabel date={currentDate} />}
-            <EventItem time={time} text={event.text} isLast={idx === events.length - 1} />
+            <EventItem time={time} text={event.text} link={event.link} isLast={idx === events.length - 1} />
           </Box>
         </Fade>
       );
