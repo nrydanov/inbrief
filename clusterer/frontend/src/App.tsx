@@ -5,7 +5,19 @@ import {
 import StoryCard from './components/StoryCard';
 import Timeline from './components/Timeline';
 import ThemeToggle from './components/ThemeToggle';
-import { STORIES } from './Data'; // Предполагается, что STORIES содержит поле 'id'
+
+interface Story {
+  id: number;
+  title: string;
+  summary: string;
+  timeline: TimelineEvent[];
+  tags?: string[];
+}
+
+interface TimelineEvent {
+  datetime: string;
+  text: string;
+}
 
 function App() {
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
@@ -14,15 +26,56 @@ function App() {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
   });
+  const [stories, setStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const selectedStory = STORIES.find(story => story.id === selectedStoryId);
+  const selectedStory = stories.find(story => story.id === selectedStoryId);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8000/get_summary');
+        if (!response.ok) {
+          throw new Error('Failed to fetch stories');
+        }
+        const data = await response.json();
+        setStories(data.stories);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography>Загрузка...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography color="error">Ошибка: {error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{
@@ -97,8 +150,8 @@ function App() {
           flexBasis: isMobile ? 'auto' : '50%',
           flexShrink: 0,
           overflowY: 'auto',
-          pr: isMobile ? 0 : 3, // Увеличиваем отступ справа только на десктопе
-          pb: isMobile ? 3 : 0, // Увеличиваем отступ снизу только на мобайле
+          pr: isMobile ? 0 : 3,
+          pb: isMobile ? 3 : 0,
         }}>
            <Fade in timeout={800}>
             <Typography
@@ -116,15 +169,13 @@ function App() {
           <Box sx={{
              display: 'grid',
              gap: 3,
-             // На десктопе одна колонка для списка, на мобайле - одна колонка
              gridTemplateColumns: '1fr'
           }}>
-            {STORIES.map((story, index) => (
+            {stories.map((story, index) => (
               <Grow in timeout={500} style={{ transitionDelay: `${index * 100}ms` }} key={story.id}>
                 <Box>
                   <StoryCard
                     story={story}
-                    // При клике просто устанавливаем выбранный ID сюжета
                     onOpen={() => setSelectedStoryId(story.id)}
                     isSelected={story.id === selectedStoryId}
                   />
@@ -140,7 +191,7 @@ function App() {
             flexBasis: '50%',
             flexShrink: 0,
             overflowY: 'auto',
-            pl: 3, // Увеличиваем отступ слева
+            pl: 3,
           }}>
             {selectedStory ? (
               <Fade in timeout={500}>
@@ -162,7 +213,7 @@ function App() {
           </Box>
         )}
 
-        {/* На мобайле таймлайн пока не показываем в этом макете, так как нет двух колонок */}
+        {/* На мобайле таймлайн показываем внизу */}
         {isMobile && selectedStory && (
            <Box sx={{
             flexGrow: 1,
