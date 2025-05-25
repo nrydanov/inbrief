@@ -16,23 +16,30 @@ export interface Story {
   tags?: string[];
 }
 
-const StoryCard = ({ story, onOpen }: { story: Story; onOpen: (story: Story) => void }) => (
+interface StoryCardProps {
+  story: Story;
+  onOpen: (story: Story) => void;
+  isSelected: boolean;
+}
+
+const StoryCard = ({ story, onOpen, isSelected }: StoryCardProps) => (
   <Card 
     sx={{ 
       height: '100%',
       transition: 'all 0.3s ease',
       '&:hover': {
-        transform: 'translateY(-4px)',
-        boxShadow: '0 12px 24px rgba(0,0,0,0.1)',
+        transform: 'translateY(-2px)',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
       },
       borderRadius: 2,
       overflow: 'hidden',
       border: '1px solid',
-      borderColor: 'divider',
+      borderColor: isSelected ? 'text.secondary' : 'divider',
     }}
   >
     <CardActionArea 
       onClick={() => onOpen(story)}
+      disableRipple
       sx={{ 
         height: '100%',
         display: 'flex',
@@ -45,11 +52,11 @@ const StoryCard = ({ story, onOpen }: { story: Story; onOpen: (story: Story) => 
           <Box>
             <Typography 
               variant="h6" 
-              sx={{ 
+              sx={{
                 fontWeight: 600,
                 mb: 1,
                 lineHeight: 1.3,
-                color: 'text.primary'
+                color: 'text.secondary'
               }}
             >
               {story.title}

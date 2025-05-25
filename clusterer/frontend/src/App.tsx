@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  Typography, Box, AppBar, Toolbar, Tab, Tabs, IconButton, useTheme, useMediaQuery,
-  Container, Fade, Grow
+  Typography, Box, AppBar, Toolbar, Tab, Tabs, useTheme, useMediaQuery, Fade, Grow
 } from '@mui/material';
 import StoryCard from './components/StoryCard';
 import Timeline from './components/Timeline';
-import type { Story } from './components/StoryCard';
 import { STORIES } from './Data'; // Предполагается, что STORIES содержит поле 'id'
 
 function App() {
@@ -20,6 +18,8 @@ function App() {
     <Box sx={{
       minHeight: '100vh',
       width: '100%',
+      maxWidth: '100vw',
+      overflowX: 'hidden',
       bgcolor: 'background.default',
       background: 'linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%)',
       display: 'flex',
@@ -67,7 +67,9 @@ function App() {
         flexDirection: isMobile ? 'column' : 'row',
         gap: 3,
         width: '100%',
+        maxWidth: '100%',
         boxSizing: 'border-box',
+        overflowX: 'hidden'
       }}>
         {/* Левая часть: Список сюжетов */}
         <Box sx={{
@@ -107,6 +109,7 @@ function App() {
                     story={story}
                     // При клике просто устанавливаем выбранный ID сюжета
                     onOpen={() => setSelectedStoryId(story.id)}
+                    isSelected={story.id === selectedStoryId}
                   />
                 </Box>
               </Grow>
@@ -125,7 +128,7 @@ function App() {
             {selectedStory ? (
               <Fade in timeout={500}>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: 'text.secondary' }}>
                     {selectedStory.title}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>

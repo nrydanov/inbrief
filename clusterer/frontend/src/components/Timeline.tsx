@@ -20,17 +20,7 @@ interface TimelineProps {
 
 const DateLabel: React.FC<{ date: string }> = ({ date }) => (
   <TimelineItem>
-    <TimelineSeparator>
-      <TimelineDot 
-        sx={{ 
-          width: 8, 
-          height: 8, 
-          bgcolor: 'primary.main',
-          boxShadow: '0 0 0 4px rgba(33, 150, 243, 0.1)'
-        }} 
-      />
-      <TimelineConnector sx={{ bgcolor: 'primary.main', width: 2 }} />
-    </TimelineSeparator>
+    <TimelineSeparator sx={{ alignItems: 'center', justifyContent: 'center' }} />
     <TimelineContent>
       <Typography 
         variant="subtitle2" 
@@ -49,7 +39,7 @@ const DateLabel: React.FC<{ date: string }> = ({ date }) => (
 
 const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({ time, text, isLast }) => (
   <TimelineItem>
-    <TimelineSeparator>
+    <TimelineSeparator sx={{ alignItems: 'center', justifyContent: 'center' }}>
       <TimelineDot 
         color="primary" 
         sx={{ 
@@ -92,7 +82,8 @@ const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({ 
           variant="body2"
           sx={{
             color: 'text.primary',
-            lineHeight: 1.6
+            lineHeight: 1.6,
+            wordBreak: 'break-word'
           }}
         >
           {text}
@@ -110,6 +101,7 @@ const Timeline: React.FC<TimelineProps> = ({ events }) => {
         py: 0,
         '& .MuiTimelineItem-root': {
           minHeight: 0,
+          maxWidth: 600,
           '&:before': {
             display: 'none'
           }
