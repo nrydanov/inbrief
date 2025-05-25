@@ -10,18 +10,13 @@ import json
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s %(message)s"
-)
 
 # Глобальные переменные
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Управление жизненным циклом приложения"""
+    logger.setLevel(logging.DEBUG)
 
     queue = multiprocessing.Queue()
     process = multiprocessing.Process(target=clustering, args=(queue,))

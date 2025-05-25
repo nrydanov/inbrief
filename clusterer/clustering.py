@@ -14,10 +14,6 @@ logger = logging.getLogger(__name__)
 
 def clustering(queue):
     logger.setLevel(logging.DEBUG)
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s %(message)s"
-    )
 
     logger.info("Starting clustering process")
     r = redis.Redis(host=settings.redis.host, port=settings.redis.port, db=0)
