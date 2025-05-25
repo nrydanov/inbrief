@@ -11,9 +11,6 @@ import json
 
 logger = logging.getLogger(__name__)
 
-# Глобальные переменные
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.setLevel(logging.DEBUG)
@@ -35,11 +32,9 @@ async def lifespan(app: FastAPI):
 
     queue.put(None)
 
-    # Очистка при завершении
     logger.info("Shutting down...")
     process.join()
 
-# Создаем FastAPI приложение с lifespan
 app = FastAPI(lifespan=lifespan)
 
 def get_entities(r):
