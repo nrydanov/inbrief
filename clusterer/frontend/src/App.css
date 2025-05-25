@@ -1,20 +1,22 @@
+/* Root container styles */
 #root {
   margin: 0 auto;
   padding: 0;
-  text-align: center;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
+  text-align: center;
 }
 
+/* Logo styles */
 .logo {
   height: 6em;
   padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
   display: block;
   margin: 0 auto;
+  transition: filter 300ms;
+  will-change: filter;
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
@@ -23,36 +25,34 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Logo spin animation for reduced motion preference */
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes logo-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
 
+/* Card styles */
 .card {
   padding: 2em;
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
   box-sizing: border-box;
-  overflow-wrap: break-word;
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
+/* Read the docs link style */
 .read-the-docs {
   color: #888;
 }
 
-/* Адаптивность для мобильных устройств */
+/* Mobile responsiveness */
 @media (max-width: 600px) {
   #root {
     padding: 0;
