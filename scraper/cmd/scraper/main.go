@@ -102,7 +102,7 @@ func main() {
 
 	eventHandler := tl.NewEventHandler(
 		state.Channels.ListenerCh,
-		state.Listener,
+		state.TlClient,
 		cfg.Streaming.BatchSize,
 	)
 

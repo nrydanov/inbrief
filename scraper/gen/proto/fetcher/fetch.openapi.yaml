@@ -113,24 +113,15 @@ components:
     fetcher.Message:
       type: object
       properties:
-        id:
-          type:
-            - integer
-            - string
-          title: id
-          format: int64
         text:
           type: string
           title: text
         ts:
           title: ts
           $ref: '#/components/schemas/google.protobuf.Timestamp'
-        chatId:
-          type:
-            - integer
-            - string
-          title: chat_id
-          format: int64
+        link:
+          type: string
+          title: link
       title: Message
       additionalProperties: false
     fetcher.SubscribeChatFolderRequest:

@@ -18,15 +18,17 @@ import (
 type EventHandler struct {
 	listener *client.Listener
 	outputCh chan<- *pb.Message
+	client   *client.Client
 }
 
 func NewEventHandler(
 	outputCh chan<- *pb.Message,
-	listener *client.Listener,
+	client *client.Client,
 	bufferSize int,
 ) *EventHandler {
 	return &EventHandler{
-		listener: listener,
+		client:   client,
+		listener: client.GetListener(),
 		outputCh: outputCh,
 	}
 }
@@ -41,7 +43,11 @@ func (eh *EventHandler) Handle(
 		case update := <-listener.Updates:
 			switch msg := update.(type) {
 			case *client.UpdateNewMessage:
-				eh.newMessageHandler(msg)
+				err := eh.newMessageHandler(msg)
+				if err != nil {
+					zap.L().Error("Unable to handle new message", zap.Error(err))
+				}
+				continue
 			}
 		case <-ctx.Done():
 			return
@@ -82,7 +88,7 @@ func processText(text *client.FormattedText) string {
 	return string(utf16.Decode(u16Text))
 }
 
-func (eh *EventHandler) newMessageHandler(msg *client.UpdateNewMessage) {
+func (eh *EventHandler) newMessageHandler(msg *client.UpdateNewMessage) error {
 	zap.L().Debug(
 		"New message",
 		zap.String("chat_id", fmt.Sprintf(
@@ -102,14 +108,30 @@ func (eh *EventHandler) newMessageHandler(msg *client.UpdateNewMessage) {
 		)
 		processedText := processText(content.Text)
 		zap.L().Debug("Processed text", zap.String("text", processedText))
+
+		chat, err := eh.client.GetChat(&client.GetChatRequest{
+			ChatId: msg.Message.ChatId,
+		})
+		if err != nil {
+			zap.L().Error("Unable to get chat")
+			return err
+		}
+
+		username, err := ExtractUsername(eh.client, chat)
+		if err != nil {
+			zap.L().Error("Unable to extract username", zap.Error(err))
+			return err
+		}
+
 		if len([]rune(processedText)) > 50 {
 			eh.outputCh <- &pb.Message{
-				Id:     msg.Message.Id,
-				Text:   processedText,
-				Ts:     timestamppb.New(time.Unix(int64(msg.Message.Date), 0)),
-				ChatId: msg.Message.ChatId,
+				Text: processedText,
+				Ts:   timestamppb.New(time.Unix(int64(msg.Message.Date), 0)),
+				Link: fmt.Sprintf("https://t.me/%s/%d", username, msg.Message.Id),
 			}
 			zap.L().Debug("Processed text is sent to output channel")
 		}
 	}
+
+	return nil
 }

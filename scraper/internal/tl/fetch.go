@@ -31,8 +31,29 @@ func FetchChannel(
 			},
 		)
 		if err != nil {
+			zap.L().Debug("Unable to get chat history")
 			return nil, err
 		}
+
+		chat, err := state.TlClient.GetChat(&client.GetChatRequest{
+			ChatId: chId,
+		})
+
+		if err != nil {
+			zap.L().Debug("Unable to get chat")
+			return nil, err
+		}
+
+		username, err := ExtractUsername(state.TlClient, chat)
+		if err != nil {
+			zap.L().Debug("Unable to extract username", zap.Error(err))
+			continue
+		}
+
+		zap.L().Debug("Chat info",
+			zap.Any("chat", chat),
+			zap.String("type", chat.Type.ChatTypeType()),
+		)
 
 		reachedEnd := false
 
@@ -50,10 +71,9 @@ func FetchChannel(
 			switch message.Content.(type) {
 			case *client.MessageText:
 				messages = append(messages, &pb.Message{
-					Id:     message.Id,
-					Text:   processText(message.Content.(*client.MessageText).Text),
-					Ts:     timestamppb.New(time.Unix(int64(message.Date), 0)),
-					ChatId: message.ChatId,
+					Text: processText(message.Content.(*client.MessageText).Text),
+					Ts:   timestamppb.New(time.Unix(int64(message.Date), 0)),
+					Link: fmt.Sprintf("https://t.me/%s/%d", username, message.Id),
 				})
 			default:
 				continue
