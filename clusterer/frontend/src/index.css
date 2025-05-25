@@ -1,25 +1,31 @@
 @import './theme.css';
 
 /* Базовые сбросы и оформление */
-html, body, #root {
+html {
   height: 100%;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+}
+
+body {
   margin: 0;
   padding: 0;
-  background: var(--bg-gradient);
+  min-height: 100%;
   color: var(--text-main);
-  font-family: 'Roboto', Arial, sans-serif;
+  font-family: 'Inter Variable', sans-serif;
+  font-variation-settings: 'wght' 400;
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
 }
 
 /* Универсальный box-sizing для всех элементов */
 *, *::before, *::after {
   box-sizing: inherit;
-}
-
-/* Сглаживание шрифтов для лучшего рендеринга */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Адаптивность для мобильных устройств */
