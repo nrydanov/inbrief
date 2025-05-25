@@ -5,7 +5,9 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
-import { Typography } from '@mui/material';
+import { Typography, Paper, Box, Fade } from '@mui/material';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 export interface TimelineEvent {
   datetime: string;
@@ -16,42 +18,31 @@ interface TimelineProps {
   events: TimelineEvent[];
 }
 
-<TimelineMui
-  sx={{
-    px: 0,
-    py: 0,
-    '& .MuiTimelineItem-root': {
-      minHeight: 0,
-    },
-    '& .MuiTimelineSeparator-root': {
-      marginLeft: 0,
-    },
-    '& .MuiTimelineDot-root': {
-      marginLeft: 0,
-    },
-    '& .MuiTimelineContent-root': {
-      paddingLeft: 2, // Optional: add space between dot and content
-    },
-    '& .MuiTimelineConnector-root': {
-      marginLeft: 0,
-    },
-    // Remove padding from the timeline itself
-    marginLeft: 0,
-    paddingLeft: 0,
-  }}
->
-  {/* timeline items */}
-</TimelineMui>
-
-
 const DateLabel: React.FC<{ date: string }> = ({ date }) => (
   <TimelineItem>
     <TimelineSeparator>
-      <TimelineDot sx={{ width: 6, height: 6, bgcolor: 'primary.main' }} />
+      <TimelineDot 
+        sx={{ 
+          width: 8, 
+          height: 8, 
+          bgcolor: 'primary.main',
+          boxShadow: '0 0 0 4px rgba(33, 150, 243, 0.1)'
+        }} 
+      />
       <TimelineConnector sx={{ bgcolor: 'primary.main', width: 2 }} />
     </TimelineSeparator>
     <TimelineContent>
-      <Typography variant="caption" sx={{ fontWeight: 'bold' }}>{date}</Typography>
+      <Typography 
+        variant="subtitle2" 
+        sx={{ 
+          fontWeight: 600,
+          color: 'primary.main',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}
+      >
+        {date}
+      </Typography>
     </TimelineContent>
   </TimelineItem>
 );
@@ -59,31 +50,101 @@ const DateLabel: React.FC<{ date: string }> = ({ date }) => (
 const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({ time, text, isLast }) => (
   <TimelineItem>
     <TimelineSeparator>
-      <TimelineDot color="primary" sx={{ width: 12, height: 12 }} />
+      <TimelineDot 
+        color="primary" 
+        sx={{ 
+          width: 16, 
+          height: 16,
+          boxShadow: '0 0 0 4px rgba(33, 150, 243, 0.1)'
+        }} 
+      />
       {!isLast && <TimelineConnector sx={{ bgcolor: 'primary.main', width: 2 }} />}
     </TimelineSeparator>
     <TimelineContent>
-      <Typography variant="body2" color="text.secondary">{time}</Typography>
-      <Typography variant="body2">{text}</Typography>
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 2,
+          mb: 2,
+          backgroundColor: 'rgba(33, 150, 243, 0.04)',
+          border: '1px solid',
+          borderColor: 'primary.light',
+          borderRadius: 2,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            backgroundColor: 'rgba(33, 150, 243, 0.08)',
+            transform: 'translateX(4px)'
+          }
+        }}
+      >
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            display: 'block',
+            color: 'primary.main',
+            fontWeight: 600,
+            mb: 0.5
+          }}
+        >
+          {time}
+        </Typography>
+        <Typography 
+          variant="body2"
+          sx={{
+            color: 'text.primary',
+            lineHeight: 1.6
+          }}
+        >
+          {text}
+        </Typography>
+      </Paper>
     </TimelineContent>
   </TimelineItem>
 );
 
 const Timeline: React.FC<TimelineProps> = ({ events }) => {
   return (
-    <TimelineMui sx={{ px: 0, py: 0 }}>
+    <TimelineMui 
+      sx={{ 
+        px: 0, 
+        py: 0,
+        '& .MuiTimelineItem-root': {
+          minHeight: 0,
+          '&:before': {
+            display: 'none'
+          }
+        },
+        '& .MuiTimelineSeparator-root': {
+          marginLeft: 0,
+        },
+        '& .MuiTimelineDot-root': {
+          marginLeft: 0,
+        },
+        '& .MuiTimelineContent-root': {
+          paddingLeft: 2,
+        },
+        '& .MuiTimelineConnector-root': {
+          marginLeft: 0,
+        },
+        marginLeft: 0,
+        paddingLeft: 0,
+      }}
+    >
       {events.map((event, idx) => {
         const dateObj = new Date(event.datetime);
-        const currentDate = dateObj.toLocaleDateString('ru-RU');
-        const time = dateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        const currentDate = format(dateObj, 'd MMMM yyyy', { locale: ru });
+        const time = format(dateObj, 'HH:mm', { locale: ru });
         const prevEvent = events[idx - 1];
-        const prevDate = prevEvent ? new Date(prevEvent.datetime).toLocaleDateString('ru-RU') : null;
+        const prevDate = prevEvent ? format(new Date(prevEvent.datetime), 'd MMMM yyyy', { locale: ru }) : null;
         const showDate = currentDate !== prevDate;
+        
         return (
-          <React.Fragment key={event.datetime + idx}>
-            {showDate && <DateLabel date={currentDate} />}
-            <EventItem time={time} text={event.text} isLast={idx === events.length - 1} />
-          </React.Fragment>
+          <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }} key={event.datetime + idx}>
+            <Box>
+              {showDate && <DateLabel date={currentDate} />}
+              <EventItem time={time} text={event.text} isLast={idx === events.length - 1} />
+            </Box>
+          </Fade>
         );
       })}
     </TimelineMui>
