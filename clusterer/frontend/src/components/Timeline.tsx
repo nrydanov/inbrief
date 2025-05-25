@@ -20,15 +20,15 @@ interface TimelineProps {
 
 const DateLabel: React.FC<{ date: string }> = ({ date }) => (
   <TimelineItem>
-    <TimelineSeparator />
+    <TimelineSeparator sx={{ alignItems: 'center', justifyContent: 'center' }} />
     <TimelineContent>
-      <Typography
-        variant="subtitle2"
-        sx={{
+      <Typography 
+        variant="subtitle2" 
+        sx={{ 
           fontWeight: 600,
-          color: 'primary.main',
+          color: 'var(--primary)',
           textTransform: 'uppercase',
-          letterSpacing: '0.5px',
+          letterSpacing: '0.5px'
         }}
       >
         {date}
@@ -37,57 +37,53 @@ const DateLabel: React.FC<{ date: string }> = ({ date }) => (
   </TimelineItem>
 );
 
-const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({
-  time,
-  text,
-  isLast,
-}) => (
+const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({ time, text, isLast }) => (
   <TimelineItem>
-    <TimelineSeparator>
-      <TimelineDot
-        color="primary"
-        sx={{
-          width: 16,
+    <TimelineSeparator sx={{ alignItems: 'center', justifyContent: 'center' }}>
+      <TimelineDot 
+        color="primary" 
+        sx={{ 
+          width: 16, 
           height: 16,
-          boxShadow: '0 0 0 4px rgba(33, 150, 243, 0.1)',
-        }}
+          boxShadow: '0 0 0 4px var(--selected)'
+        }} 
       />
-      {!isLast && <TimelineConnector sx={{ bgcolor: 'primary.main', width: 2 }} />}
+      {!isLast && <TimelineConnector sx={{ bgcolor: 'var(--primary)', width: 2 }} />}
     </TimelineSeparator>
     <TimelineContent>
-      <Paper
+      <Paper 
         elevation={0}
-        sx={{
+        sx={{ 
           p: 2,
           mb: 2,
-          backgroundColor: 'rgba(33, 150, 243, 0.04)',
+          backgroundColor: 'var(--bg)',
           border: '1px solid',
-          borderColor: 'primary.light',
+          borderColor: 'var(--primary-light)',
           borderRadius: 2,
           transition: 'all 0.3s ease',
           '&:hover': {
-            backgroundColor: 'rgba(33, 150, 243, 0.08)',
-            transform: 'translateX(4px)',
-          },
+            backgroundColor: 'var(--hover)',
+            transform: 'translateX(4px)'
+          }
         }}
       >
-        <Typography
-          variant="caption"
-          sx={{
+        <Typography 
+          variant="caption" 
+          sx={{ 
             display: 'block',
-            color: 'primary.main',
+            color: 'var(--primary)',
             fontWeight: 600,
-            mb: 0.5,
+            mb: 0.5
           }}
         >
           {time}
         </Typography>
-        <Typography
+        <Typography 
           variant="body2"
           sx={{
-            color: 'text.primary',
+            color: 'var(--text-main)',
             lineHeight: 1.6,
-            wordBreak: 'break-word',
+            wordBreak: 'break-word'
           }}
         >
           {text}
@@ -97,49 +93,52 @@ const EventItem: React.FC<{ time: string; text: string; isLast: boolean }> = ({
   </TimelineItem>
 );
 
-const Timeline: React.FC<TimelineProps> = ({ events }) => {
-  if (!events || events.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary" align="center">
-        Нет событий для отображения
-      </Typography>
-    );
-  }
-
-  return (
-    <TimelineMui
-      sx={{
-        px: 0,
-        py: 0,
+const Timeline: React.FC<TimelineProps> = ({ events }) => (
+  <TimelineMui 
+    sx={{ 
+      px: 0, 
+      py: 0,
+      '& .MuiTimelineItem-root': {
+        minHeight: 0,
+        maxWidth: 600,
+        '&:before': {
+          display: 'none'
+        }
+      },
+      '& .MuiTimelineSeparator-root': {
         marginLeft: 0,
-        paddingLeft: 0,
-        '& .MuiTimelineItem-root': {
-          minHeight: 0,
-          maxWidth: 600,
-          '&:before': { display: 'none' },
-        },
-        '& .MuiTimelineContent-root': { paddingLeft: 2 },
-      }}
-    >
-      {events.map((event, idx) => {
-        const dateObj = new Date(event.datetime);
-        const currentDate = format(dateObj, 'd MMMM yyyy', { locale: ru });
-        const time = format(dateObj, 'HH:mm', { locale: ru });
-        const prevEvent = events[idx - 1];
-        const prevDate = prevEvent ? format(new Date(prevEvent.datetime), 'd MMMM yyyy', { locale: ru }) : null;
-        const showDate = currentDate !== prevDate;
-
-        return (
-          <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }} key={`${event.datetime}-${idx}`}>
-            <Box>
-              {showDate && <DateLabel date={currentDate} />}
-              <EventItem time={time} text={event.text} isLast={idx === events.length - 1} />
-            </Box>
-          </Fade>
-        );
-      })}
-    </TimelineMui>
-  );
-};
+      },
+      '& .MuiTimelineDot-root': {
+        marginLeft: 0,
+      },
+      '& .MuiTimelineContent-root': {
+        paddingLeft: 2,
+      },
+      '& .MuiTimelineConnector-root': {
+        marginLeft: 0,
+      },
+      marginLeft: 0,
+      paddingLeft: 0,
+    }}
+  >
+    {events.map((event, idx) => {
+      const dateObj = new Date(event.datetime);
+      const currentDate = format(dateObj, 'd MMMM yyyy', { locale: ru });
+      const time = format(dateObj, 'HH:mm', { locale: ru });
+      const prevEvent = events[idx - 1];
+      const prevDate = prevEvent ? format(new Date(prevEvent.datetime), 'd MMMM yyyy', { locale: ru }) : null;
+      const showDate = currentDate !== prevDate;
+      
+      return (
+        <Fade in timeout={500} style={{ transitionDelay: `${idx * 100}ms` }} key={event.datetime + idx}>
+          <Box>
+            {showDate && <DateLabel date={currentDate} />}
+            <EventItem time={time} text={event.text} isLast={idx === events.length - 1} />
+          </Box>
+        </Fade>
+      );
+    })}
+  </TimelineMui>
+);
 
 export default Timeline;

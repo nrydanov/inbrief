@@ -1,18 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Typography, Box, AppBar, Toolbar, Tab, Tabs, useTheme, useMediaQuery, Fade, Grow
 } from '@mui/material';
 import StoryCard from './components/StoryCard';
 import Timeline from './components/Timeline';
+import ThemeToggle from './components/ThemeToggle';
 import { STORIES } from './Data'; // Предполагается, что STORIES содержит поле 'id'
 
 function App() {
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
   const [tabValue, setTabValue] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const selectedStory = STORIES.find(story => story.id === selectedStoryId);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
 
   return (
     <Box sx={{
@@ -21,7 +31,7 @@ function App() {
       maxWidth: '100vw',
       overflowX: 'hidden',
       bgcolor: 'background.default',
-      background: 'linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%)',
+      background: 'var(--gradient-background)',
       display: 'flex',
       flexDirection: 'column'
     }}>
@@ -30,25 +40,35 @@ function App() {
         elevation={0}
         sx={{
           backdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
+          backgroundColor: isDarkMode ? 'rgba(18, 18, 18, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          borderBottom: '1px solid var(--color-border)'
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Tabs
             value={tabValue}
             onChange={(_, v) => setTabValue(v)}
             textColor="primary"
             indicatorColor="primary"
             sx={{
+              '& .MuiTabs-root': {
+                color: 'var(--color-tab-text)',
+              },
               '& .MuiTab-root': {
                 fontSize: '1rem',
                 fontWeight: 600,
                 textTransform: 'none',
                 minWidth: 120,
                 transition: 'all 0.3s ease',
+                color: 'var(--color-tab-text)',
                 '&:hover': {
-                  color: 'primary.main',
+                  color: 'var(--color-primary)',
+                },
+                '&.Mui-selected': {
+                  color: 'var(--color-primary)',
+                },
+                '&.Mui-disabled': {
+                  color: 'var(--color-text-disabled)',
                 }
               }
             }}
@@ -57,6 +77,7 @@ function App() {
             <Tab label="Избранное" disabled />
             <Tab label="Настройки" disabled />
           </Tabs>
+          <ThemeToggle isDarkMode={isDarkMode} onToggle={() => setIsDarkMode(!isDarkMode)} />
         </Toolbar>
       </AppBar>
       <Box sx={{
@@ -86,14 +107,10 @@ function App() {
               sx={{
                 fontWeight: 800,
                 mb: 4,
-                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                backgroundClip: 'text',
-                textFillColor: 'transparent',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
+                color: 'var(--color-text-primary)'
               }}
             >
-              Сюжеты дня
+              Сюжеты
             </Typography>
           </Fade>
           <Box sx={{
@@ -128,17 +145,17 @@ function App() {
             {selectedStory ? (
               <Fade in timeout={500}>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: 'text.secondary' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: 'var(--color-text-primary)' }}>
                     {selectedStory.title}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
+                  <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7, color: 'var(--color-text-secondary)' }}>
                     {selectedStory.summary}
                   </Typography>
                   <Timeline events={selectedStory.timeline} />
                 </Box>
               </Fade>
             ) : (
-              <Typography variant="h6" align="center" color="text.secondary" sx={{ mt: 5 }}>
+              <Typography variant="h6" align="center" sx={{ mt: 5, color: 'var(--color-text-secondary)' }}>
                 Выберите сюжет, чтобы увидеть таймлайн
               </Typography>
             )}
@@ -154,10 +171,10 @@ function App() {
              pt: 3,
              borderTop: '1px solid rgba(0, 0, 0, 0.12)'
            }}>
-             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'var(--color-text-primary)' }}>
                 {selectedStory.title}
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
+              <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7, color: 'var(--color-text-secondary)' }}>
                 {selectedStory.summary}
               </Typography>
              <Timeline events={selectedStory.timeline} />

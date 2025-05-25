@@ -1,0 +1,59 @@
+:root {
+  /* Основные цвета (Primary Palette) */
+  --primary: #2196F3;
+  --primary-light: #64B5F6;
+  --primary-dark: #1976D2;
+  --primary-contrast: #FFFFFF;
+
+  /* Фоновые цвета (Backgrounds) */
+  --bg: #FFFFFF;
+  --bg-alt: #F5F7FA;
+  --bg-gradient: linear-gradient(180deg, #F5F7FA 0%, #FFFFFF 100%);
+
+  /* Текстовые цвета (Text) */
+  --text-main: #213547;
+  --text-secondary: rgba(0, 0, 0, 0.6);
+  --text-disabled: rgba(0, 0, 0, 0.38);
+
+  /* Граничные цвета (Borders & Shadows) */
+  --border: rgba(0, 0, 0, 0.12);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --shadow: rgba(0, 0, 0, 0.1);
+
+  /* Цвета для состояний (States) */
+  --hover: rgba(33, 150, 243, 0.08);
+  --selected: rgba(33, 150, 243, 0.12);
+
+  /* Градиенты (Gradients) */
+  --gradient-primary: linear-gradient(45deg, var(--primary) 30%, var(--primary-light) 90%);
+}
+
+[data-theme="dark"] {
+  /* Основные цвета (Primary Palette) */
+  --primary: #2196F3;
+  --primary-light: #64B5F6;
+  --primary-dark: #1976D2;
+  --primary-contrast: #FFFFFF;
+
+  /* Фоновые цвета (Backgrounds) */
+  --bg: #121212;
+  --bg-alt: #1E1E1E;
+  --bg-gradient: linear-gradient(180deg, #1E1E1E 0%, #121212 100%);
+
+  /* Текстовые цвета (Text) */
+  --text-main: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+
+  /* Граничные цвета (Borders & Shadows) */
+  --border: rgba(255, 255, 255, 0.12);
+  --border-light: rgba(255, 255, 255, 0.08);
+  --shadow: rgba(0, 0, 0, 0.3);
+
+  /* Цвета для состояний (States) */
+  --hover: rgba(33, 150, 243, 0.16);
+  --selected: rgba(33, 150, 243, 0.24);
+
+  /* Градиенты (Gradients) */
+  --gradient-primary: linear-gradient(45deg, var(--primary) 30%, var(--primary-light) 90%);
+}

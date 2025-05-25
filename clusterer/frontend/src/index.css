@@ -1,80 +1,32 @@
-/* ===== Root Theme Variables ===== */
-:root {
-  /* Typography */
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import './theme.css';
 
-  /* Color scheme */
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #fbf4f4;
+/* Базовые сбросы и оформление */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  font-family: 'Roboto', Arial, sans-serif;
+  box-sizing: border-box;
+}
 
-  /* Font rendering */
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+/* Универсальный box-sizing для всех элементов */
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Сглаживание шрифтов для лучшего рендеринга */
+body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== Body Layout ===== */
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  /* Remove flex/centering: let app container handle layout */
-}
-
-/* ===== Headings ===== */
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-/* ===== Links ===== */
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-a:hover {
-  color: #535bf2;
-}
-
-/* ===== Buttons ===== */
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  color: inherit;
-  cursor: pointer;
-  transition: border-color 0.25s, background-color 0.2s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 2px solid #646cff;
-  outline-offset: 2px;
-}
-
-/* ===== Light Mode Overrides ===== */
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #fff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-    color: #213547;
+/* Адаптивность для мобильных устройств */
+@media (max-width: 600px) {
+  html, body, #root {
+    font-size: 15px;
   }
 }
+
+/* Можно добавить кастомные анимации или классы, если они реально используются */

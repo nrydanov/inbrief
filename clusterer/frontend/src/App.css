@@ -19,10 +19,10 @@
   will-change: filter;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--color-primary-light));
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em var(--color-primary));
 }
 
 /* Logo spin animation for reduced motion preference */
@@ -49,7 +49,7 @@
 
 /* Read the docs link style */
 .read-the-docs {
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 /* Mobile responsiveness */
